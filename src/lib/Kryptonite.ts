@@ -1,105 +1,99 @@
+// All these constants are not necessary anymore, but I distinctly remember how helpful they were during development to 
+// aquickly test different settings I could adjust until I got the gameplay to feel just right.  Gravity in the Game class was a fun one
 const MAX_HEIGHT = 240;
 const MIN_HEIGHT = 30;
-const WIDTH = 40;
-const GAP = 88;
-const COLLISION_PADDING = 3;
+const GAP_BETWEEN_KRYPTONITE = 88;
+const STEP_AMOUNT = 2.6
+
+// This extra "collision" padding is added to edges when we draw on canvas.
+// Later when we calculate for collision detection we use the instance's original edge dimensions.
+// This results in less strict detection.
+const KRYPTONITE_WIDTH = 40;
+const COLLISION_PADDING = 3; 
+const PADDED_KRYPTONITE_WIDTH = KRYPTONITE_WIDTH + COLLISION_PADDING
 
 class Kryptonite {
-  
-
-  topHeight = Math.random() * MAX_HEIGHT + MIN_HEIGHT;
-  bottomHeight: number
-  width = WIDTH;
-  image = new Image();
-
-  game_height: number
-  game_width: number
-  ctx: CanvasRenderingContext2D
-
+  topKryptoniteHeight = Math.random() * MAX_HEIGHT + MIN_HEIGHT;
+  bottomKryptoniteHeight: number
   xBottomPosition: number
   yBottomPosition: number
   xTopPosition: number
   yTopPosition: number
+  image = new Image();
+  canvas: CanvasRenderingContext2D
 
-  constructor(ctx: CanvasRenderingContext2D, game_height: number, game_width: number) {
-    this.game_height = game_height
-    this.game_width = game_width
+  constructor(canvas: CanvasRenderingContext2D, game_height: number, game_width: number) {
+    // game_height and game_width are used as inital reference points to know where to start 
+    // our first stroke onto the canvas to enter the game.  Allows for potentially exploring
+    // different canvas sizes
+
+    // Top kryptonite's position on the canvas
     this.xTopPosition = game_width
     this.yTopPosition = 0
 
+    // Bottoms kryptonite's position on the canvas + height
     this.xBottomPosition = game_width
-    this.yBottomPosition = 0 + this.topHeight + GAP
-    this.image.src = '../assets/images/kryptonite.png'
-    this.ctx = ctx
-    this.bottomHeight =  game_height - this.topHeight - GAP;
+    this.yBottomPosition = this.topKryptoniteHeight + GAP_BETWEEN_KRYPTONITE
+    this.bottomKryptoniteHeight =  game_height - this.topKryptoniteHeight - GAP_BETWEEN_KRYPTONITE
 
+    this.image.src = '../assets/images/kryptonite.png'
+    this.canvas = canvas
   }
 
- 
-
-
   draw(): void {
-    var padding = COLLISION_PADDING
-
-    // Draws collision paths
-    // ctx.strokeRect(this.xTopPosition, this.yTopPosition, this.width, this.topHeight)
-    this.ctx.drawImage(
+    // Draws top kryptonite
+    this.canvas.drawImage(
       this.image,
-      0,
-      400 - this.topHeight - padding,
-      50,
-      this.topHeight + padding,
-      this.xTopPosition,
-      this.yTopPosition,
-      this.width + padding,
-      this.topHeight + padding
+      0, // The x-axis coordinate of the top left corner of the sub-rectangle of the source image
+      400 - this.topKryptoniteHeight - COLLISION_PADDING, // The y-axis coordinate of the top left corner of the sub-rectangle of the source image
+      50, // The width of the sub-rectangle of the source image
+      this.topKryptoniteHeight + COLLISION_PADDING, // The height of the sub-rectangle of the source image
+      this.xTopPosition, // The x-axis coordinate in the destination canvas at which to place the top-left corner of the source image.
+      this.yTopPosition, // The y-axis coordinate in the destination canvas at which to place the top-left corner of the source image.
+      PADDED_KRYPTONITE_WIDTH, // The width to draw the image in the destination canvas.
+      this.topKryptoniteHeight + COLLISION_PADDING //The height to draw the image in the destination canvas.
     );
 
-    // Draws collision paths
-    // ctx.strokeRect(this.xBottomPosition, this.yBottomPosition, this.width, this.bottomHeight)
-    this.ctx.drawImage(
+    // Draws bottom kryptonite
+    // this.canvas.strokeRect(this.xBottomPosition, this.yBottomPosition, this.width, this.bottomKryptoniteHeight)
+    this.canvas.drawImage(
       this.image,
-      65,
-      38,
-      50,
-      this.bottomHeight + padding,
-      this.xBottomPosition,
-      this.yBottomPosition - padding,
-      this.width + padding,
-      this.bottomHeight + padding
+      65, // source position
+      38, // source position
+      50, // source position
+      this.bottomKryptoniteHeight + COLLISION_PADDING, // target position
+      this.xBottomPosition, // target position
+      this.yBottomPosition - COLLISION_PADDING, // target position
+      PADDED_KRYPTONITE_WIDTH, // width
+      this.bottomKryptoniteHeight + COLLISION_PADDING // height
     );
   };
 
   step() {
-    this.xTopPosition -= 2.6;
-    this.xBottomPosition -= 2.6;
+    this.xTopPosition -= STEP_AMOUNT;
+    this.xBottomPosition -= STEP_AMOUNT;
+  };
+  
+  isOffScreen(): boolean {
+    // Used to garbage collect
+    return this.xTopPosition + KRYPTONITE_WIDTH < 0
   };
 
-  isOffScreen() {
-    return this.xTopPosition + this.width < 0
-  };
+  bottomKryptoniteTopEdge(): number {
+    return this.topKryptoniteHeight + GAP_BETWEEN_KRYPTONITE
+  }
 
-  // sideCollision(bird: typeof Bird) {
-  //   return (this.xTopPosition < bird.pos[0]) &&
-  //           (this.xTopPosition >= bird.backPos[0]) &&
-  //           (bird.yTopPosition < this.topHeight ||
-  //             bird.backPos[1] > this.topHeight + GAP)
-  // };
+  topKryptoniteBottomEdge(): number {
+    return this.topKryptoniteHeight
+  }
 
-  // gapCollision(bird: typeof Bird) {
-  //   return (bird.pos[0] < this.xTopPosition + this.width) &&
-  //           (bird.pos[0] > this.xTopPosition) &&
-  //           (bird.yTopPosition < this.yTopPosition ||
-  //            bird.pos[1] > this.yBottomPosition)
-  // };
-
-  // trigCollision(bird: typeof Bird) {
-  //   var xRightCorner = this.xTopPosition + this.width;
-  //   return (bird.pos[0] > xRightCorner) &&
-  //           (bird.backPos[0] < xRightCorner) &&
-  //           (bird.backPos[1] > this.yBottomPosition ||
-  //           (xRightCorner - bird.backPos[0]) > (bird.backPos[1] - this.topHeight))
-  // };
+  leftEdge() {
+    return this.xTopPosition
+  }
+  
+  rightEdge() {
+    return this.xTopPosition + KRYPTONITE_WIDTH
+  }
 }
 
 export default Kryptonite

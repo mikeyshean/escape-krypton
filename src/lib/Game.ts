@@ -1,11 +1,11 @@
-import Bird from './Bird'
+import Superman from './Superman'
 import Kryptonite from './Kryptonite';
 import $ from "jquery";
 
 
 class Game {
-    bird: Bird
-    allObjects: (Bird|Kryptonite)[]
+    superman: Superman
+    gamePieces: (Superman|Kryptonite)[]
     height = 400;
     width = 800;
     currentCount = 0;
@@ -13,52 +13,50 @@ class Game {
     goingUp = true
     paused = false
     gameOver = false
-
     GRAVITY = .2;
 
-    ctx: CanvasRenderingContext2D
-    constructor(ctx: CanvasRenderingContext2D) {
-      this.ctx = ctx
-      this.bird = new Bird(ctx=this.ctx, this.GRAVITY)
-      this.allObjects = [this.bird]
+    canvas: CanvasRenderingContext2D
+    constructor(canvas: CanvasRenderingContext2D) {
+      this.canvas = canvas
+      this.superman = new Superman(this.canvas, this.GRAVITY)
+      this.gamePieces = [this.superman]
     }
 
     draw(blankCount: boolean): void {
-      this.ctx.clearRect(0, 0, 800, 400);
+      this.canvas.clearRect(0, 0, 800, 400);
       
-      this.allObjects.forEach(function (object) {
-      
+      this.gamePieces.forEach(function (object) {
         object.draw();
       })
       this.drawCount(blankCount);
     };
 
     drawMenu() {
-      const ctx = this.ctx
-      ctx.clearRect(0, 0, 800, 400);
-      this.floatBird();
+      const canvas = this.canvas
+      canvas.clearRect(0, 0, 800, 400);
+      this.floatSuperman();
 
-      ctx.fillStyle = "#2AE249";
-      ctx.strokeStyle = "#00CC00";
-      ctx.lineJoin = "miter";
-      ctx.lineWidth = 1;
-      ctx.font = "28px 'Press Start 2P'"
-      ctx.fillText("Escape from Krypton", 135, 75);
-      ctx.strokeText("Escape from Krypton", 135, 75);
+      canvas.fillStyle = "#2AE249";
+      canvas.strokeStyle = "#00CC00";
+      canvas.lineJoin = "miter";
+      canvas.lineWidth = 1;
+      canvas.font = "28px 'Press Start 2P'"
+      canvas.fillText("Escape from Krypton", 135, 75);
+      canvas.strokeText("Escape from Krypton", 135, 75);
 
-      ctx.font = "16px 'Press Start 2P'"
-      ctx.fillStyle = "#fff";
-      ctx.strokeStyle = "#2e5280";
-      ctx.fillText("Press 'space', 'up', or 'click' to fly", 95, 320);
-      ctx.strokeText("Press 'space', 'up', or 'click' to fly", 95, 320);
-      ctx.fillText("Don't hit the", 197, 355);
-      ctx.strokeText("Don't hit the", 197, 355);
+      canvas.font = "16px 'Press Start 2P'"
+      canvas.fillStyle = "#fff";
+      canvas.strokeStyle = "#2e5280";
+      canvas.fillText("Press 'space', 'up', or 'click' to fly", 95, 320);
+      canvas.strokeText("Press 'space', 'up', or 'click' to fly", 95, 320);
+      canvas.fillText("Don't hit the", 197, 355);
+      canvas.strokeText("Don't hit the", 197, 355);
 
-      ctx.fillStyle = "#2AE249";
-      ctx.strokeStyle = "#00CC00";
-      ctx.fillText("Kryptonite!", 421, 355);
-      ctx.strokeText("Kryptonite!", 421, 355);
-      this.bird.draw();
+      canvas.fillStyle = "#2AE249";
+      canvas.strokeStyle = "#00CC00";
+      canvas.fillText("Kryptonite!", 421, 355);
+      canvas.strokeText("Kryptonite!", 421, 355);
+      this.superman.draw();
     };
 
     step() {
@@ -69,23 +67,23 @@ class Game {
       this.tryAddKryptonite();
     };
 
-    floatBird() {
-      const birdVel = this.bird.yVelocity
+    floatSuperman() {
+      const supermanVelocity = this.superman.yVelocity
       if (this.goingUp) {
-        this.bird.move(1, true)
+        this.superman.move(1, true)
       } else {
-        this.bird.move(0, true)
+        this.superman.move(0, true)
       }
 
-      if (birdVel < -1) {
+      if (supermanVelocity < -1) {
         this.goingUp = false
-      } else if (birdVel > 2) {
+      } else if (supermanVelocity > 2) {
         this.goingUp = true;
       }
     };
 
     addKryptonite() {
-      this.allObjects.push(new Kryptonite(this.ctx, this.height, this.width))
+      this.gamePieces.push(new Kryptonite(this.canvas, this.height, this.width))
     };
 
     togglePause() {
@@ -93,18 +91,46 @@ class Game {
     };
 
     checkCollisions() {
-      this.allObjects.forEach((object) => {
-        if (object instanceof Bird) { return; }
+      // TODO: This is unecessarily checking extra kryptonite
+      this.gamePieces.forEach((object) => {
+        if (object instanceof Superman) { return; }
 
-        if (this.isCollision(object)) {
+        const kryptonite = object as Kryptonite
+        if (this.isSideCollision(kryptonite) ||
+            this.gapCollision(kryptonite) ||
+            this.trigCollision(kryptonite)
+        ) {
           this.gameOver = true;
         }
       })
     };
 
-    isCollision(kryptonite: Kryptonite): boolean {
-      return false
+    // See main ReadME for visuals of what scenarios of collisions these cover
+    private isSideCollision(kryptonite: Kryptonite) {
+      // Must be that the left edge is in between superman's hit box
+      // and he is either crossing above or below the gap boundaries
+      // Note: Top left of canvas is [0, 0]
+      
+      return (this.superman.rightEdge() > kryptonite.leftEdge()) &&
+            (this.superman.leftEdge() <= kryptonite.leftEdge()) &&
+            (this.superman.topEdge() < kryptonite.topKryptoniteBottomEdge() ||
+              this.superman.yBackEdge() > kryptonite.bottomKryptoniteTopEdge())
     }
+    
+    private gapCollision(kryptonite: Kryptonite) {
+      return (this.superman.rightEdge() < kryptonite.rightEdge()) &&
+              (this.superman.rightEdge() > kryptonite.leftEdge()) &&
+              (this.superman.topEdge() < kryptonite.topKryptoniteBottomEdge() ||
+              this.superman.yBottomRight() > kryptonite.bottomKryptoniteTopEdge())
+    };
+
+    private trigCollision(kryptonite: Kryptonite) {
+      return (this.superman.rightEdge() > kryptonite.rightEdge()) &&
+              (this.superman.leftEdge() < kryptonite.rightEdge()) &&
+              (this.superman.yBackEdge() > kryptonite.bottomKryptoniteTopEdge() ||
+              (kryptonite.rightEdge() - this.superman.leftEdge()) > (this.superman.yBackEdge() - kryptonite.topKryptoniteBottomEdge()))
+    };
+
 
     bindKeys() {
       $(document).off("keydown")
@@ -114,12 +140,12 @@ class Game {
         switch (e.which) {
           case 38: // up
             e.preventDefault();
-            this.bird.move(6.5, false)
+            this.superman.move(6.5, false)
             break;
 
           case 32: // up
             e.preventDefault();
-            this.bird.move(6.5, false)
+            this.superman.move(6.5, false)
             break;
 
           case 80: // pause
@@ -134,35 +160,35 @@ class Game {
 
       $("#canvas").on("click", (e:JQuery.Event) => {
         e.preventDefault();
-        this.bird.move(6.5, false)
+        this.superman.move(6.5, false)
       })
     };
 
     moveObjects() {
-      this.allObjects.forEach((object) => {
+      this.gamePieces.forEach((object) => {
         object.step();
       })
     };
 
     removeKryptonite() {
-      const firstKryptonite = this.allObjects[1]
+      const firstKryptonite = this.gamePieces[1]
       if (firstKryptonite?.isOffScreen()) {
-        this.allObjects.splice(1, 1)
+        this.gamePieces.splice(1, 1)
       }
     };
 
     drawCount(blankCount: boolean) {
       const text = (blankCount) ? "" : String(this.currentCount)
 
-      this.ctx.fillStyle = "#EA1821"
-      this.ctx.strokeStyle = "#2e5280"
-      this.ctx.font = "28px 'Press Start 2P'"
-      this.ctx.fillText(text, 390, 60);
-      this.ctx.strokeText(text, 390, 60);
+      this.canvas.fillStyle = "#EA1821"
+      this.canvas.strokeStyle = "#2e5280"
+      this.canvas.font = "28px 'Press Start 2P'"
+      this.canvas.fillText(text, 390, 60);
+      this.canvas.strokeText(text, 390, 60);
     };
 
     tryAddKryptonite() {
-      const lastKryptonite = this.allObjects[this.allObjects.length - 1];
+      const lastKryptonite = this.gamePieces[this.gamePieces.length - 1];
       if (lastKryptonite && lastKryptonite.xTopPosition < (this.width / 2)) {
         this.addKryptonite();
         this.currentCount++
@@ -170,13 +196,13 @@ class Game {
   };
 
   checkGameOver(): void {
-    this.gameOver || (this.gameOver = this.bird.isGone())
+    this.gameOver || (this.gameOver = this.superman.isGone())
   };
 
   reset() {
-    this.bird.reset();
+    this.superman.reset();
     this.bindKeys()
-    this.allObjects = [this.bird];
+    this.gamePieces = [this.superman];
     this.gameOver = false;
     this.currentCount = 0;
   };

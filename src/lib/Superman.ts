@@ -6,15 +6,15 @@ const START_POS_Y = 200;
 const START_VEL_X = 0
 const START_VEL_Y = 0
 
-class Bird {
+class Superman {
 
   xPosition = START_POS_X;
   yPosition = START_POS_Y;
   xTopPosition = START_POS_X
   yTopPosition = START_POS_Y - DIM
-  backPos = [START_POS_X - DIM, START_POS_Y];
+  yBackPosition = START_POS_Y
+  xBackPosition = START_POS_X - DIM
   dim = DIM;
-  // i = pos[0];
   image = new Image();
   flySound = new Audio();
   xVelocity = START_VEL_X
@@ -22,7 +22,7 @@ class Bird {
   ctx: CanvasRenderingContext2D
   gravity: number
 
-  constructor (ctx: CanvasRenderingContext2D, gravity: number) {
+  constructor(ctx: CanvasRenderingContext2D, gravity: number) {
     this.image.src = 'assets/images/chubby-superman.png'
     this.flySound.src = 'assets/soundfx/fly.m4a'
     this.ctx = ctx
@@ -61,12 +61,6 @@ class Bird {
       40,
       40
     );
-
-    // ctx.moveTo(this.pos[0], this.pos[1]);
-    // ctx.lineTo(this.topPos[0], this.topPos[1])
-    // ctx.lineTo(this.backPos[0], this.backPos[1])
-    // ctx.closePath();
-    // ctx.stroke();
   };
 
   move(dir: number, floating: boolean): void {
@@ -88,17 +82,9 @@ class Bird {
     this.yVelocity += this.gravity
     this.yPosition += this.yVelocity
     this.yTopPosition += this.yVelocity
-    this.backPos[1] += this.yVelocity
+    this.yBackPosition += this.yVelocity
   }
   
-
-  // The game should detect collisions between its game objects
-  // isCollidedWith(kryptonite): boolean {
-  //   return kryptonite.sideCollision(this) ||
-  //           kryptonite.gapCollision(this) ||
-  //           kryptonite.trigCollision(this)
-  // };
-
   isGone(): boolean {
     return this.yPosition > 400
   }
@@ -108,14 +94,36 @@ class Bird {
     this.yPosition = START_POS_Y
     this.xTopPosition = START_POS_X
     this.yTopPosition = START_POS_Y - DIM
-    this.backPos = [START_POS_X - DIM, START_POS_Y];
+    this.yBackPosition = START_POS_Y
+    this.xBackPosition = START_POS_X - DIM
     this.xVelocity = START_VEL_X
     this.yVelocity = START_VEL_Y
   }
 
   isOffScreen(): boolean {
-    // used for kryptonite removal 
+    // Only used for kryptonite removal 
     return false
   };
+
+  yBackEdge(): number {
+    return this.yBackPosition
+  }
+
+  leftEdge() {
+    return this.xBackPosition
+  }
+
+  topEdge(): number {
+    return this.yTopPosition
+  }
+
+  rightEdge(): number {
+    return this.xPosition
+  }
+  
+  yBottomRight(): number {
+    return this.yPosition
+  }
+
 }
-export default Bird
+export default Superman

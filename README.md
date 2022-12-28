@@ -2,7 +2,7 @@
 
 
 
-*Escape from Krypton* is a Superman themed browser game based on the ever addicting *Flappy Bird*.  It is written in Javascript and utilizes HTML5 / Canvas for smooth rendering.  Try your luck and see how far you can make it!
+*Escape from Krypton* is a Superman themed browser game based on the ever addicting *Flappy Bird*.  It was originally written in Javascript and utilized HTML5 / Canvas. The original project can be found here: [Link](http://github.com/mikeyshean/krypton)
 
 [Live][kryptonite]
 [kryptonite]: http://mikeyshean.com/kryptonite

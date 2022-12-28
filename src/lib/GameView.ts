@@ -127,7 +127,7 @@ class GameView {
     ctx.lineJoin = "round";
     ctx.lineWidth = 10;
 
-    //outer score box
+    // outer score box
     this.roundRect(250, 100, 300, 200, 10)
 
     ctx.fillStyle = "#B42420";
