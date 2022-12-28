@@ -37,15 +37,15 @@ when a collision occurs.  For this game we need three types of collision detecti
 #### `sideCollision()`:
 Here we detect when the right vertical edge of Superman's triangular "hit box" collides with the left edge of the Kryptonite.
 
-![sideCollision](./src/kryptonite/docs/side_collision.png)
+![sideCollision](./src/assets/docs/side_collision.png)
 
 #### `gapCollision()`:
 
 Here we detect when the top point or bottom edge of Superman collides with the top/bottom edges of the Kryptonite within the gap.
 
-![gapCollision](./src/kryptonite//docs/gap_collision.png)
+![gapCollision](./src/assets//docs/gap_collision.png)
 
 #### `trigCollision()`:
 Finally, we detect when the rear hypotenuse edge of Superman's hit box collides with the bottom edge of the top Kryptonite.
 
-![trigCollision](./src/kryptonite//docs/trig_collision.png)
+![trigCollision](./src/assets//docs/trig_collision.png)
