@@ -1,6 +1,5 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import { useEffect } from "react";
 import { trpc } from "../utils/trpc";
 import GameView from '../lib/GameView'
@@ -8,7 +7,7 @@ import $ from "jquery";
 
 const Home: NextPage = () => {
   // const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
-  
+
   useEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
     var ctx = canvas.getContext('2d')
@@ -17,7 +16,6 @@ const Home: NextPage = () => {
     if (ctx && $el) {
       var gameView = new GameView(ctx, $el, $leaderList)
       gameView.showMenu()
-      console.log("useEffect")
     }
   }, [])
 
@@ -37,9 +35,10 @@ const Home: NextPage = () => {
           </div>
           <div className="leaderboard">
             <span className="leaderboard-title">Leaderboard</span>
-            <ul id="leaderboar-list" className="leaderboard-list">
+            <ul id="leaderboard-list" className="leaderboard-list">
             </ul>
           </div>
+          {/* {hello.data?.greeting} */}
         </div>
       </div>
     </>
