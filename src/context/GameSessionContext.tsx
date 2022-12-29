@@ -12,9 +12,7 @@ type GameSession = {
 type GameSessionContextType = {
   createSession: () => void,
   gameSession: GameSession,
-  setGameSession: (game_session: GameSession) => void,
-  isGameSession: () => boolean
-  
+  updateLocalHighScore: (highScore: number) => void
 }
 
 const GameSessionContext = React.createContext({} as GameSessionContextType);
@@ -23,32 +21,31 @@ function useGameSessionContext() {
     return useContext(GameSessionContext)
 }
 
-
-
-
 function GameSessionProvider({children}: {children: React.ReactNode}) {
 
     const [gameSession, setGameSession] = useState({id: '', highScore: 0})
-    console.log("first load GameSessionProvider: "+gameSession.id)
     
-    const isGameSession = () => !!gameSession.id
     const gameSessionCreate = trpc.gameSession.create.useMutation()
 
     async function createSession() {
-      const gameSession = await gameSessionCreate.mutateAsync(true)
-      localStorage.setItem(SESSION_KEY, gameSession.id)
+      const newSession = await gameSessionCreate.mutateAsync(true)
+      localStorage.setItem(SESSION_KEY, JSON.stringify(newSession))
       
-      setGameSession(gameSession)
+      setGameSession(newSession)
+    }
+
+    function updateLocalHighScore(highScore: number) {
+      const newLocalSession = {...gameSession}
+      newLocalSession.highScore = highScore
+      localStorage.setItem(SESSION_KEY, JSON.stringify(newLocalSession))
     }
 
     useEffect(() => {
-        console.log("GameSessionProvider useEffect: Checking for stored tokens")
-        const storedSessionId = localStorage.getItem(SESSION_KEY) ? localStorage.getItem(SESSION_KEY) as string : ''
-        if (storedSessionId) {
-            console.log(`Found Token!    setGameSession with ${storedSessionId}`)
-            setGameSession({id: storedSessionId, highScore: 0})
+        // Get or Create GameSession
+        const storedSession = localStorage.getItem(SESSION_KEY) ? JSON.parse(localStorage.getItem(SESSION_KEY) as string) : ''
+        if (storedSession) {
+            setGameSession({id: storedSession.id, highScore: storedSession.highScore})
         } else {
-          console.log("No token found.... creating one")
           createSession()
         }
     },[])
@@ -58,8 +55,7 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
           value={{
             createSession,
             gameSession,
-            setGameSession: (gameSession: GameSession) => setGameSession(gameSession),
-            isGameSession,
+            updateLocalHighScore: updateLocalHighScore,
           }}
         >
          {children}

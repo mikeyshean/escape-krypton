@@ -8,7 +8,6 @@ import { string } from "zod";
 import { useGameSessionContext } from "../context/GameSessionContext";
 
 const Home: NextPage = () => {
-  const { gameSession, isGameSession } = useGameSessionContext()
 
   return (
     <>

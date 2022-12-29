@@ -7,14 +7,14 @@ import { useGameSessionContext } from '../context/GameSessionContext'
 const THEME_SONG_START_TIME = 46
 
 function GameController() {
-  const { gameSession, isGameSession } = useGameSessionContext()
+  const { gameSession, updateLocalHighScore } = useGameSessionContext()
   let themeSong: HTMLAudioElement
   let gameOverAudio: HTMLAudioElement
   let game: Game
   let $leaderList: JQuery
   let $submitScore: JQuery
   let $restart: JQuery
-  let ctx: CanvasRenderingContext2D
+  let canvas: CanvasRenderingContext2D
   let gameId: string
   
   if (typeof Audio != "undefined") { 
@@ -31,17 +31,17 @@ function GameController() {
 
   useEffect(() => {
     // Wait for mount before querying DOM
-    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    const context = canvas.getContext('2d')
+    const canvasElement = document.getElementById('canvas') as HTMLCanvasElement;
+    const canvasContext = canvasElement.getContext('2d')
     const $el = $(".game-wrapper")
     $submitScore = $el.find(".submit")
     $restart = $el.find(".restart");
     $leaderList = $(".leaderboard-list")
 
-    if (isValidGameState(context, $el, gameSession.id)) {
+    if (isValidGameState(canvasContext, $el, gameSession.id)) {
       enableThemeSongLooping()
-      ctx = context!
-      game = new Game(ctx)
+      canvas = canvasContext!
+      game = new Game(canvas, gameSession.highScore)
       showMenu()
     }
   }, [gameSession])
@@ -76,8 +76,8 @@ function GameController() {
     game.reset()
     game.addKryptonite()
 
-    ctx.lineJoin = "miter";
-    ctx.lineWidth = 1;
+    canvas.lineJoin = "miter";
+    canvas.lineWidth = 1;
     const intervalId = setInterval(() => {
       if (!game.paused) {
         game.step()
@@ -98,10 +98,11 @@ function GameController() {
   }
 
   function endGame(intervalId: NodeJS.Timer) {
-    clearInterval(intervalId);
-    validateEndGame(gameId, game.getFinalScore())
     game.draw() // Needed to redraw without score counter visible
     
+    clearInterval(intervalId);
+    validateEndGame(gameId, game.getFinalScore())
+    updateHighScore(game.getFinalScore())
     playEndGameAudio()
 
     setTimeout(() => {
@@ -150,27 +151,34 @@ function GameController() {
 
   async function validateEndGame(gameId: string, score: number) {
     const now = new Date().toISOString()
-    const endedGame = await endGameApi.mutateAsync({id: gameId, endedAt: now, score: score})
+    const validGame = await endGameApi.mutateAsync({id: gameId, endedAt: now, score: score, sessionId: gameSession.id})
+    return validGame 
+  }
+
+  function updateHighScore(score: number) {
+    if (score > gameSession.highScore) {
+      updateLocalHighScore(score)
+    }
   }
 
   function showFinalScores() {
-    ctx.fillStyle = "#2e5280"
-    ctx.strokeStyle = "#2e5280"
-    ctx.lineJoin = "round";
-    ctx.lineWidth = 10;
+    canvas.fillStyle = "#2e5280"
+    canvas.strokeStyle = "#2e5280"
+    canvas.lineJoin = "round";
+    canvas.lineWidth = 10;
 
     // outer score box
     roundRect(250, 100, 300, 200, 10)
 
-    ctx.fillStyle = "#B42420";
-    ctx.strokeStyle = "#B42420";
+    canvas.fillStyle = "#B42420";
+    canvas.strokeStyle = "#B42420";
 
     // restart button
     roundRect(270, 245, 120, 45, 10)
     roundRect(410, 245, 120, 45, 10)
 
-    ctx.fillStyle = "#fff"
-    ctx.font = "18px 'Press Start 2P'"
+    canvas.fillStyle = "#fff"
+    canvas.font = "18px 'Press Start 2P'"
 
     const finalScore = game.getFinalScore()
     
@@ -186,10 +194,10 @@ function GameController() {
       xCoord = doubleDigitPosition
     }
     const yFinalScorePosition = 165
-    ctx.fillText("Score", 358, 140);
-    ctx.fillText(String(finalScore), xCoord, yFinalScorePosition);
+    canvas.fillText("Score", 358, 140);
+    canvas.fillText(String(finalScore), xCoord, yFinalScorePosition);
 
-    const bestScore = game.highestScore();
+    const bestScore = game.getHighScore();
     xCoord = singleDigitPosition
     if (bestScore >= 100 ) {
       xCoord = tripleDigitPosition
@@ -197,15 +205,15 @@ function GameController() {
       xCoord = doubleDigitPosition
     }
     const yBestScorePosition = 225
-    ctx.fillText("Best", 368, 200);
-    ctx.fillText(String(bestScore), xCoord, yBestScorePosition);
+    canvas.fillText("Best", 368, 200);
+    canvas.fillText(String(bestScore), xCoord, yBestScorePosition);
   };
 
   function submitScore(name: string|null) {
     if (name) {
       const data = {
         'name': name,
-        'score': game.highestScore()
+        'score': game.getHighScore()
       }
       $.ajax({
         type: "POST",
@@ -214,7 +222,7 @@ function GameController() {
         dataType: 'json',
         success: (leaders) => {
             // renderLeaderboard(leaders);
-            game.bestCount = 0;
+            game.highScore = 0;
         }
       });
     }
@@ -302,14 +310,14 @@ function GameController() {
   }
 
   function roundRect(rectX: number, rectY: number, rectWidth: number, rectHeight: number, cornerRadius: number) {
-    ctx.strokeRect(
+    canvas.strokeRect(
       rectX+(cornerRadius/2),
       rectY+(cornerRadius/2),
       rectWidth-cornerRadius,
       rectHeight-cornerRadius
     )
 
-    ctx.fillRect(
+    canvas.fillRect(
       rectX+(cornerRadius/2),
       rectY+(cornerRadius/2),
       rectWidth-cornerRadius,

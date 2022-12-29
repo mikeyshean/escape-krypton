@@ -1,7 +1,6 @@
 import { contextProps } from "@trpc/react-query/dist/internals/context";
 import { z } from "zod";
 import { Prisma } from '@prisma/client';
-import isValidScore from '../../validateGame'
 
 import { router, publicProcedure } from "../trpc";
 

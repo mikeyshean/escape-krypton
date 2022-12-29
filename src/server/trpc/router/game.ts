@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Prisma } from '@prisma/client';
-import isValidScore from '../../validateGame'
+import isValidGame from '../../validateGame'
 
 import { router, publicProcedure } from "../trpc";
 
@@ -11,7 +11,8 @@ const startGameSelect = Prisma.validator<Prisma.GameSelect>()({
 const endGameSelect = Prisma.validator<Prisma.GameSelect>()({
   id: true,
   startedAt: true,
-  endedAt: true
+  endedAt: true,
+  sessionId: true
 });
 
 export const gameRouter = router({
@@ -31,16 +32,17 @@ export const gameRouter = router({
       return game
     }),
   end: publicProcedure
-    .input(z.object({id: z.string(), endedAt: z.string().datetime(), score: z.number()}))
+    .input(z.object({id: z.string(), endedAt: z.string().datetime(), score: z.number(), sessionId: z.string()}))
     .mutation(async ({ctx, input}) => {
       const id = input.id
       const score = input.score
       const endedAt = input.endedAt
+      const sessionId = input.sessionId
 
-      // TODO: maybe validate session too
       const game = await ctx.prisma.game.update({
         where: {
           id: id,
+          sessionId: sessionId
         },
         data: {
           endedAt: endedAt,
@@ -49,8 +51,7 @@ export const gameRouter = router({
         select: endGameSelect
       })
       
-      // TODO: Do some validation on score
-      if (isValidScore(game.startedAt, game.endedAt, score)) {
+      if (isValidGame(game)) {
         return game 
       } else {
         console.log("H4x0r")

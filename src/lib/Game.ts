@@ -9,17 +9,18 @@ class Game {
     height = 400;
     width = 800;
     kryptonitesCreated = 0;
-    bestCount = 0;
+    highScore = 0;
     goingUp = true
     paused = false
     gameOver = false
     GRAVITY = .2;
 
     canvas: CanvasRenderingContext2D
-    constructor(canvas: CanvasRenderingContext2D) {
+    constructor(canvas: CanvasRenderingContext2D, highScore: number) {
       this.canvas = canvas
       this.superman = new Superman(this.canvas, this.GRAVITY)
       this.gamePieces = [this.superman]
+      this.highScore = highScore
     }
 
     draw(): void {
@@ -221,16 +222,16 @@ class Game {
     this.kryptonitesCreated = 0;
   };
 
-  highestScore() {
-    if (this.kryptonitesCreated - 1 > this.bestCount) {
-      this.bestCount = this.kryptonitesCreated - 1
+  getHighScore() {
+    if (this.getFinalScore() > this.highScore) {
+      this.highScore = this.getFinalScore()
     }
 
-    return this.bestCount;
+    return this.highScore;
   }
 
   getCurrentScore() {
-    return this.kryptonitesCreated - 1
+    return this.kryptonitesCreated > 0 ? this.kryptonitesCreated  - 1 : this.kryptonitesCreated
   }
 
   getFinalScore() {
@@ -238,7 +239,7 @@ class Game {
     // A new one is created as superman PASSES through the previous one which is ambiguous for scoring
     // You may have noticed the score counter during the game is updated as superman enters the gap without
     // fully clearing. This is barely noticeable, but because of it we need to -1 here for the final score
-    return this.getCurrentScore() - 1
+    return this.getCurrentScore() > 0  ? this.getCurrentScore() - 1 : this.getCurrentScore()
   }
 };
 
