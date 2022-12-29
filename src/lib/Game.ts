@@ -121,7 +121,7 @@ class Game {
       })
     };
 
-    // See main ReadME for visuals of what types of collision scenarios these cover
+    // See main README for visuals of what types of collision scenarios these cover
     private isSideCollision(kryptonite: Kryptonite) {
       // Must be that the left edge is in between superman's hit box
       // and he is either crossing above or below the gap boundaries
