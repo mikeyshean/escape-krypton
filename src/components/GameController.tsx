@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
-import Game from './Game'
+import Game from '../lib/Game'
 import { trpc } from "../utils/trpc";
 import $ from "jquery";
 import { useGameSessionContext } from '../context/GameSessionContext'
 
-function GameView() {
+function GameController() {
   const { gameSession, isGameSession } = useGameSessionContext()
   let themeSong: HTMLAudioElement
   let gameOver: HTMLAudioElement
@@ -14,7 +14,6 @@ function GameView() {
   let $restart: JQuery
   let ctx: CanvasRenderingContext2D
   let gameId: string
-  let currentScore: number
   
   if (typeof Audio != "undefined") { 
     themeSong = new Audio("assets/soundfx/superman_theme.mp3") as HTMLAudioElement
@@ -92,8 +91,7 @@ function GameView() {
 
       if (game.gameOver) {
         // Todo Move more of this to game class
-        currentScore = game.currentCount > 0 ? game.currentCount - 1 : game.currentCount
-        updateEndGame(gameId, currentScore)
+        updateEndGame(gameId, game.getCurrentScore())
         game.draw(true)
         clearInterval(intervalId);
         themeSong.pause();
@@ -177,7 +175,7 @@ function GameView() {
     ctx.fillStyle = "#fff"
     ctx.font = "18px 'Press Start 2P'"
 
-    const currentScore = game.currentCount > 0 ? game.currentCount - 1 : game.currentCount
+    const currentScore = game.getCurrentScore()
     
     // TODO: What in the world does this do??
     let xCoord = 393
@@ -310,4 +308,4 @@ function GameView() {
   )
 }
 
-export default GameView
+export default GameController

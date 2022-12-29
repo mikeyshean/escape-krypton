@@ -8,7 +8,7 @@ class Game {
     gamePieces: (Superman|Kryptonite)[]
     height = 400;
     width = 800;
-    currentCount = 0;
+    kryptonitesCreated = 0;
     bestCount = 0;
     goingUp = true
     paused = false
@@ -84,6 +84,7 @@ class Game {
 
     addKryptonite() {
       this.gamePieces.push(new Kryptonite(this.canvas, this.height, this.width))
+      this.kryptonitesCreated++
     };
 
     togglePause() {
@@ -178,7 +179,7 @@ class Game {
     };
 
     drawCount(blankCount: boolean) {
-      const text = (blankCount) ? "" : String(this.currentCount)
+      const text = (blankCount) ? "" : String(this.kryptonitesCreated)
 
       this.canvas.fillStyle = "#EA1821"
       this.canvas.strokeStyle = "#2e5280"
@@ -188,10 +189,10 @@ class Game {
     };
 
     tryAddKryptonite() {
+      // Adds next kryptonite when current one is halfway through game space
       const lastKryptonite = this.gamePieces[this.gamePieces.length - 1];
       if (lastKryptonite && lastKryptonite.xTopPosition < (this.width / 2)) {
         this.addKryptonite();
-        this.currentCount++
       }
   };
 
@@ -204,15 +205,19 @@ class Game {
     this.bindKeys()
     this.gamePieces = [this.superman];
     this.gameOver = false;
-    this.currentCount = 0;
+    this.kryptonitesCreated = 0;
   };
 
   highestScore() {
-    if (this.currentCount - 1 > this.bestCount) {
-      this.bestCount = this.currentCount - 1
+    if (this.kryptonitesCreated - 1 > this.bestCount) {
+      this.bestCount = this.kryptonitesCreated - 1
     }
 
     return this.bestCount;
+  }
+
+  getCurrentScore() {
+    return this.kryptonitesCreated > 0 ? this.kryptonitesCreated - 1 : this.kryptonitesCreated
   }
 };
 

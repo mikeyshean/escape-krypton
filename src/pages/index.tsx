@@ -2,7 +2,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { useEffect, useState } from "react";
 import { trpc } from "../utils/trpc";
-import GameView from '../lib/GameView'
+import GameController from '../components/GameController'
 import $ from "jquery";
 import { string } from "zod";
 import { useGameSessionContext } from "../context/GameSessionContext";
@@ -19,7 +19,7 @@ const Home: NextPage = () => {
       </Head>
       <div className="window-container">
         <div className="main">
-          <GameView />
+          <GameController />
           {/* <div className="game-wrapper">
             <canvas id="canvas" width="800" height="400"></canvas>
             <span className="restart">Restart</span>
