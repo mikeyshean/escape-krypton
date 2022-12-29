@@ -4,10 +4,12 @@ import { trpc } from "../utils/trpc";
 import $ from "jquery";
 import { useGameSessionContext } from '../context/GameSessionContext'
 
+const THEME_SONG_START_TIME = 46
+
 function GameController() {
   const { gameSession, isGameSession } = useGameSessionContext()
   let themeSong: HTMLAudioElement
-  let gameOver: HTMLAudioElement
+  let gameOverAudio: HTMLAudioElement
   let game: Game
   let $leaderList: JQuery
   let $submitScore: JQuery
@@ -17,7 +19,7 @@ function GameController() {
   
   if (typeof Audio != "undefined") { 
     themeSong = new Audio("assets/soundfx/superman_theme.mp3") as HTMLAudioElement
-    gameOver = new Audio("assets/soundfx/game_over.mp3")
+    gameOverAudio = new Audio("assets/soundfx/game_over.mp3")
   }
 
   const createGameApi = trpc.game.start.useMutation();
@@ -28,6 +30,7 @@ function GameController() {
 
 
   useEffect(() => {
+    // Wait for mount before querying DOM
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
     const context = canvas.getContext('2d')
     const $el = $(".game-wrapper")
@@ -35,13 +38,17 @@ function GameController() {
     $restart = $el.find(".restart");
     $leaderList = $(".leaderboard-list")
 
-    if (context && $el && gameSession.id) {
-      ctx = context
+    if (isValidGameState(context, $el, gameSession.id)) {
+      enableThemeSongLooping()
+      ctx = context!
       game = new Game(ctx)
       showMenu()
     }
   }, [gameSession])
 
+  function isValidGameState(context: CanvasRenderingContext2D|null, $gameWrapper: JQuery, sessionId: string): Boolean {
+    return context !== null && $gameWrapper && sessionId.length > 0
+  }
 
   function showMenu(): void {
     const intervalId = setInterval(() => {
@@ -50,61 +57,65 @@ function GameController() {
     bindKeys(intervalId);
   }
 
-  function prepareThemeSong() {
-    addLooping()
-    
-    // Must wait for user click to play song
-    // https://developer.chrome.com/blog/autoplay/
-    $("window").on("click", () => {
-      themeSong.currentTime = 46;
-      themeSong.play();
-    })
-  }
-
-  function addLooping() {
-    if (typeof themeSong.loop == 'boolean') {
-      themeSong.loop = true;
-    } else {
-      themeSong.addEventListener('ended',() => {
-        themeSong.currentTime = 46;
-        themeSong.play();
-      })
-    }
+  function startGame() {
+    resetEndgameMenu()
+    getGameId(gameSession.id)
+    run();
+  };
+  
+  function resetEndgameMenu() {
+    $restart.hide();
+    $submitScore.hide();
+    $submitScore.off("click")
+    $restart.off("click")
   }
 
   function run(): void {
-    if (themeSong.paused) {
-      themeSong.currentTime = 46
-      themeSong.play();
-    }
-    game.reset();
+    playThemeSong()
+
+    game.reset()
     game.addKryptonite()
 
     ctx.lineJoin = "miter";
     ctx.lineWidth = 1;
-
     const intervalId = setInterval(() => {
       if (!game.paused) {
-        game.step();
-        game.draw(false);
+        game.step()
+        game.draw()
       }
 
       if (game.gameOver) {
-        // Todo Move more of this to game class
-        updateEndGame(gameId, game.getCurrentScore())
-        game.draw(true)
-        clearInterval(intervalId);
-        themeSong.pause();
-        gameOver.currentTime = 0;
-        gameOver.play();
-
-        setTimeout(() => {
-          showEndGame();
-        }, 300)
-
+        endGame(intervalId)  
       }
     }, 1000/60)
   };
+
+  function playThemeSong() {
+    if (themeSong.paused) {
+      themeSong.currentTime = THEME_SONG_START_TIME
+      themeSong.play();
+    }
+  }
+
+  function endGame(intervalId: NodeJS.Timer) {
+    clearInterval(intervalId);
+    validateEndGame(gameId, game.getFinalScore())
+    console.log("End game Score: "+game.getFinalScore())
+    game.draw() // Needed to redraw without score counter visible
+    
+    playEndGameAudio()
+
+    setTimeout(() => {
+      showEndGameModal();
+    }, 300)
+  }
+
+  function playEndGameAudio() {
+    themeSong.pause();
+    gameOverAudio.currentTime = 0;
+    gameOverAudio.play();
+
+  }
 
   function bindKeys(intervalId: NodeJS.Timer|undefined) {
     $(document).on("keydown", (e: JQuery.Event) => {
@@ -132,31 +143,18 @@ function GameController() {
     })
   };
 
-  function startGame() {
-    resetEndgameMenu()
-    getGameId(gameSession.id)
-    run();
-  };
-  
-  function resetEndgameMenu() {
-    $restart.hide();
-    $submitScore.hide();
-    $submitScore.off("click")
-    $restart.off("click")
-  }
-
   async function getGameId(sessionId: string) {
     const now = new Date().toISOString()
     const newGame = await createGameApi.mutateAsync({startedAt: now, sessionId: sessionId})
     gameId = newGame.id
   }
 
-  async function updateEndGame(gameId: string, score: number) {
+  async function validateEndGame(gameId: string, score: number) {
     const now = new Date().toISOString()
     const endedGame = await endGameApi.mutateAsync({id: gameId, endedAt: now, score: score})
   }
 
-  function showScore() {
+  function showFinalScores() {
     ctx.fillStyle = "#2e5280"
     ctx.strokeStyle = "#2e5280"
     ctx.lineJoin = "round";
@@ -175,27 +173,33 @@ function GameController() {
     ctx.fillStyle = "#fff"
     ctx.font = "18px 'Press Start 2P'"
 
-    const currentScore = game.getCurrentScore()
+    const finalScore = game.getFinalScore()
     
-    // TODO: What in the world does this do??
-    let xCoord = 393
-    if (currentScore >= 100 ) {
-      xCoord = 375
-    } else if (currentScore >= 10) {
-      xCoord = 383
+    // Centers Score in score box
+    const singleDigitPosition = 393
+    const doubleDigitPosition = 383
+    const tripleDigitPosition = 375
+
+    let xCoord = singleDigitPosition
+    if (finalScore >= 100 ) {
+      xCoord = tripleDigitPosition
+    } else if (finalScore >= 10) {
+      xCoord = doubleDigitPosition
     }
+    const yFinalScorePosition = 165
     ctx.fillText("Score", 358, 140);
-    ctx.fillText(String(currentScore), xCoord, 165);
+    ctx.fillText(String(finalScore), xCoord, yFinalScorePosition);
 
     const bestScore = game.highestScore();
-    xCoord = 393
+    xCoord = singleDigitPosition
     if (bestScore >= 100 ) {
-      xCoord = 375
+      xCoord = tripleDigitPosition
     } else if (bestScore >= 10) {
-      xCoord = 383
+      xCoord = doubleDigitPosition
     }
+    const yBestScorePosition = 225
     ctx.fillText("Best", 368, 200);
-    ctx.fillText(String(bestScore), xCoord, 225);
+    ctx.fillText(String(bestScore), xCoord, yBestScorePosition);
   };
 
   function submitScore(name: string|null) {
@@ -253,8 +257,8 @@ function GameController() {
   //   }
   // };
 
-  function showEndGame() {
-    showScore();
+  function showEndGameModal() {
+    showFinalScores();
     $restart.show();
     $submitScore.show();
 
@@ -274,6 +278,29 @@ function GameController() {
       e.preventDefault();
       startGame();
     })
+  }
+
+  function prepareThemeSong() {
+    enableThemeSongLooping()
+    
+    // Must wait for user click to play song
+    // https://developer.chrome.com/blog/autoplay/
+    $("window").on("click", () => {
+      themeSong.currentTime = THEME_SONG_START_TIME;
+      themeSong.play();
+    })
+  }
+
+  function enableThemeSongLooping() {
+    console.log("add looping")
+    if (typeof themeSong.loop == 'boolean') {
+      themeSong.loop = true;
+    } else {
+      themeSong.addEventListener('ended',() => {
+        themeSong.currentTime = THEME_SONG_START_TIME;
+        themeSong.play();
+      })
+    }
   }
 
   function roundRect(rectX: number, rectY: number, rectWidth: number, rectHeight: number, cornerRadius: number) {

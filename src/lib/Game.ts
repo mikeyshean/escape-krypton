@@ -22,13 +22,29 @@ class Game {
       this.gamePieces = [this.superman]
     }
 
-    draw(blankCount: boolean): void {
+    draw(): void {
+      // Main drawing of entire game state for each step
       this.canvas.clearRect(0, 0, 800, 400);
       
       this.gamePieces.forEach(function (object) {
         object.draw();
       })
-      this.drawCount(blankCount);
+      if (this.gameOver) {
+        this.hideScoreCounter()
+      } else {
+        this.showScoreCounter();
+      }
+    };
+
+    showScoreCounter() {
+      const text = String(this.getCurrentScore())
+      console.log("score counter: "+ text)
+      this.drawCounter(text)
+    };
+
+    hideScoreCounter() {
+      const text = ""
+      this.drawCounter(text)
     };
 
     drawMenu() {
@@ -106,7 +122,7 @@ class Game {
       })
     };
 
-    // See main ReadME for visuals of what scenarios of collisions these cover
+    // See main ReadME for visuals of what types of collision scenarios these cover
     private isSideCollision(kryptonite: Kryptonite) {
       // Must be that the left edge is in between superman's hit box
       // and he is either crossing above or below the gap boundaries
@@ -178,15 +194,13 @@ class Game {
       }
     };
 
-    drawCount(blankCount: boolean) {
-      const text = (blankCount) ? "" : String(this.kryptonitesCreated)
-
+    drawCounter(text: string) {
       this.canvas.fillStyle = "#EA1821"
       this.canvas.strokeStyle = "#2e5280"
       this.canvas.font = "28px 'Press Start 2P'"
       this.canvas.fillText(text, 390, 60);
       this.canvas.strokeText(text, 390, 60);
-    };
+    }
 
     tryAddKryptonite() {
       // Adds next kryptonite when current one is halfway through game space
@@ -217,7 +231,15 @@ class Game {
   }
 
   getCurrentScore() {
-    return this.kryptonitesCreated > 0 ? this.kryptonitesCreated - 1 : this.kryptonitesCreated
+    return this.kryptonitesCreated - 1
+  }
+
+  getFinalScore() {
+    // We need this because the currentScore is calculated as new kryptonites are created
+    // A new one is created as superman PASSES through the previous one which is ambiguous for scoring
+    // You may have noticed the score counter during the game is updated as superman enters the gap without
+    // fully clearing. This is barely noticeable, but because of it we need to -1 here for the final score
+    return this.getCurrentScore() - 1
   }
 };
 

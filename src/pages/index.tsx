@@ -20,16 +20,6 @@ const Home: NextPage = () => {
       <div className="window-container">
         <div className="main">
           <GameController />
-          {/* <div className="game-wrapper">
-            <canvas id="canvas" width="800" height="400"></canvas>
-            <span className="restart">Restart</span>
-            <span className="submit">Submit<br/> Score</span>
-          </div>
-          <div className="leaderboard">
-            <span className="leaderboard-title">Leaderboard</span>
-            <ul id="leaderboard-list" className="leaderboard-list">
-            </ul>
-          </div> */}
         </div>
       </div>
     </>

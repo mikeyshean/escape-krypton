@@ -1,4 +1,3 @@
-import { contextProps } from "@trpc/react-query/dist/internals/context";
 import { z } from "zod";
 import { Prisma } from '@prisma/client';
 import isValidScore from '../../validateGame'
@@ -50,13 +49,11 @@ export const gameRouter = router({
         select: endGameSelect
       })
       
-      // Do some validation on session
+      // TODO: Do some validation on score
       if (isValidScore(game.startedAt, game.endedAt, score)) {
         return game 
       } else {
         console.log("H4x0r")
       }
-
-    
     })
 });
