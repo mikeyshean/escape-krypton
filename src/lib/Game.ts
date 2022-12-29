@@ -38,7 +38,6 @@ class Game {
 
     showScoreCounter() {
       const text = String(this.getCurrentScore())
-      console.log("score counter: "+ text)
       this.drawCounter(text)
     };
 

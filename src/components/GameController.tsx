@@ -100,7 +100,6 @@ function GameController() {
   function endGame(intervalId: NodeJS.Timer) {
     clearInterval(intervalId);
     validateEndGame(gameId, game.getFinalScore())
-    console.log("End game Score: "+game.getFinalScore())
     game.draw() // Needed to redraw without score counter visible
     
     playEndGameAudio()
@@ -292,7 +291,6 @@ function GameController() {
   }
 
   function enableThemeSongLooping() {
-    console.log("add looping")
     if (typeof themeSong.loop == 'boolean') {
       themeSong.loop = true;
     } else {
