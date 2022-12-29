@@ -1,23 +1,14 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { trpc } from "../utils/trpc";
 import GameView from '../lib/GameView'
 import $ from "jquery";
+import { string } from "zod";
+import { useGameSessionContext } from "../context/GameSessionContext";
 
 const Home: NextPage = () => {
-  // const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
-
-  useEffect(() => {
-    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    var ctx = canvas.getContext('2d')
-    var $el = $(".game-wrapper")
-    var $leaderList = $(".leaderboard-list")
-    if (ctx && $el) {
-      var gameView = new GameView(ctx, $el, $leaderList)
-      gameView.showMenu()
-    }
-  }, [])
+  const { gameSession, isGameSession } = useGameSessionContext()
 
   return (
     <>
@@ -28,7 +19,8 @@ const Home: NextPage = () => {
       </Head>
       <div className="window-container">
         <div className="main">
-          <div className="game-wrapper">
+          <GameView />
+          {/* <div className="game-wrapper">
             <canvas id="canvas" width="800" height="400"></canvas>
             <span className="restart">Restart</span>
             <span className="submit">Submit<br/> Score</span>
@@ -37,8 +29,7 @@ const Home: NextPage = () => {
             <span className="leaderboard-title">Leaderboard</span>
             <ul id="leaderboard-list" className="leaderboard-list">
             </ul>
-          </div>
-          {/* {hello.data?.greeting} */}
+          </div> */}
         </div>
       </div>
     </>

@@ -10,24 +10,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Example {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model GameSession {
-  id        String   @id @default(cuid())
-  startedAt DateTime
-  endedAt   DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  games     Game[]      @relation("Games")
+  highScore Int         @default(0)
 }
 
-model Scores {
+model Game {
+  id        String      @id @default(cuid())
+  startedAt DateTime
+  endedAt   DateTime?
+  score     Int?
+  validated Boolean     @default(false)
+  session   GameSession @relation("Games", fields: [sessionId], references: [id])
+  sessionId String
+  
+}
+
+model HighScores {
   id          String   @id @default(cuid())
   score       DateTime
-  playerName  String   @unique
+  playerName  String
   submittedAt DateTime
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
