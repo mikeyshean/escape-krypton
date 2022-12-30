@@ -4,7 +4,9 @@ import { Prisma } from '@prisma/client';
 import { router, publicProcedure } from "../trpc";
 
 const defaultScoreSelect = Prisma.validator<Prisma.HighScoresSelect>()({
-  id: true
+  id: true,
+  score: true,
+  playerName: true
 });
 
 const defaultGameSelect = Prisma.validator<Prisma.GameSelect>()({

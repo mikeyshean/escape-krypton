@@ -1,19 +1,20 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Game from '../lib/Game'
 import { trpc } from "../utils/trpc"
 import $ from "jquery"
 import { useGameSessionContext } from '../context/GameSessionContext'
 import { useCanvasContext } from '../context/CanvasContext'
+import Leaderboard from './Leaderboard'
 
 const THEME_SONG_START_TIME = 46
 
 function GameController() {
   const { gameSession, updateLocalHighScore } = useGameSessionContext()
   const { canvas } = useCanvasContext()
+
   let themeSong: HTMLAudioElement
   let gameOverAudio: HTMLAudioElement
   let game: Game
-  let $leaderList: JQuery
   let $submitScore: JQuery
   let $restart: JQuery
   let currentGameId: string
@@ -27,6 +28,7 @@ function GameController() {
 
   const createGameApi = trpc.game.start.useMutation()
   const submitScoreApi = trpc.score.submit.useMutation()
+  const listScoresApi = trpc.score.list.useQuery()
   const endGameApi = trpc.game.end.useMutation()
 
   // const prepareThemeSong() // useEffect here
@@ -38,7 +40,6 @@ function GameController() {
     const $el = $(".game-wrapper")
     $submitScore = $el.find(".submit")
     $restart = $el.find(".restart")
-    $leaderList = $(".leaderboard-list")
 
     if (isValidGameState(canvas, $el, gameSession.id)) {
       enableThemeSongLooping()
@@ -47,13 +48,19 @@ function GameController() {
     }
   }, [])
 
+  let scores
+  if (listScoresApi.isSuccess) {
+    const { data } = listScoresApi
+    scores = data
+  }
+
   return (
     <>
-      <div className="leaderboard">
-        <span className="leaderboard-title">Leaderboard</span>
-        <ul id="leaderboard-list" className="leaderboard-list">
-        </ul>
-      </div>
+      {
+        scores && (
+          <Leaderboard scores={scores}/>
+        )
+      }
     </>
   )
 
@@ -243,41 +250,6 @@ function GameController() {
       })
     }
   }
-
-  // function getLeaders() {
-  //   $.ajax({
-  //     type: "GET",
-  //     url:"https://ms-leaderboards.herokuapp.com/leaders",
-  //     dataType: 'json',
-  //     success:function(leaders){
-  //         renderLeaderboard(leaders)
-  //     }.bind(this)
-  //   })
-  // }
-
-  // function renderLeaderboard(leaders) {
-  //   $leaderList.empty()
-  //   const name, score, rank, leader
-
-  //   for (const i = 0 i < 10 i++) {
-  //     leader = leaders[i]
-  //     rank = i + 1
-  //     const $li = $("<li>").addClass("group")
-  //     if (leader) {
-  //       name = leader["name"]
-  //       score = leader["score"]
-  //     } else {
-  //       name = "???"
-  //       score = "???"
-  //     }
-  //     const $nameSpan = $("<span>" + rank + ".  " + name + "</span>")
-  //     const $scoreSpan = $("<span>" + score + "</span>")
-  //     (rank < 10) ? $nameSpan.addClass("padding") : ""
-  //     $li.append($nameSpan).append($scoreSpan)
-  //     $leaderList.append($li)
-
-  //   }
-  // }
 
   function showEndGameModal() {
     showFinalScores()
