@@ -1,7 +1,6 @@
-import { contextProps } from "@trpc/react-query/dist/internals/context";
 import { z } from "zod";
 import { Prisma } from '@prisma/client';
-
+import { TRPCError } from '@trpc/server';
 import { router, publicProcedure } from "../trpc";
 
 const defaultSessionSelect = Prisma.validator<Prisma.GameSessionSelect>()({
@@ -24,12 +23,22 @@ export const gameSessionRouter = router({
     .input(z.object({id: z.string()}))
     .query(async ({ctx, input}) => {
       const id = input.id
-      const session = await ctx.prisma.gameSession.findUnique({
-        where: {
-          id: id
-        },
-        select: defaultSessionSelect
-      })
-      return session
+      if (id) {
+        const session = await ctx.prisma.gameSession.findUnique({
+          where: {
+            id: id
+          },
+          select: defaultSessionSelect
+        })
+        if (!session) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Session not found',
+          })
+        }
+        return session
+      } else {
+        return null
+      }
     })
 });
