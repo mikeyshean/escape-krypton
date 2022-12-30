@@ -31,10 +31,6 @@ function GameController() {
   const listScoresApi = trpc.score.list.useQuery()
   const endGameApi = trpc.game.end.useMutation()
 
-  // const prepareThemeSong() // useEffect here
-  // getLeaders()
-
-
   useEffect(() => {
     // Wait for mount before querying DOM
     const $el = $(".game-wrapper")
@@ -270,17 +266,6 @@ function GameController() {
     $restart.one("click", (e) => {
       e.preventDefault()
       startGame()
-    })
-  }
-
-  function prepareThemeSong() {
-    enableThemeSongLooping()
-    
-    // Must wait for user click to play song
-    // https://developer.chrome.com/blog/autoplay/
-    $("window").on("click", () => {
-      themeSong.currentTime = THEME_SONG_START_TIME
-      themeSong.play()
     })
   }
 
