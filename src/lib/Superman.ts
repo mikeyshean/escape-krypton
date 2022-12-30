@@ -1,5 +1,4 @@
 const DIM = 33;
-const COLOR = "green";
 const MAX_VEL = -5.5;
 const START_POS_X = 400;
 const START_POS_Y = 200;

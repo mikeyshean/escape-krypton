@@ -19,7 +19,7 @@ type GameSessionContextType = {
   setGameSession: (gameSession: GameSession) => void
 }
 
-const GameSessionContext = React.createContext({} as GameSessionContextType);
+const GameSessionContext = React.createContext({} as GameSessionContextType)
 
 function useGameSessionContext() {
     return useContext(GameSessionContext)
