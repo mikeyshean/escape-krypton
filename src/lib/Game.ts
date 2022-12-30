@@ -230,10 +230,15 @@ class Game {
     return this.highScore;
   }
 
+  resetHighScore() {
+    this.highScore = 0
+  }
+
   getCurrentScore() {
     return this.kryptonitesCreated > 0 ? this.kryptonitesCreated  - 1 : this.kryptonitesCreated
   }
 
+  // TODO: This is all wrong if superman falls off the map between kryptonites.  
   getFinalScore() {
     // We need this because the currentScore is calculated as new kryptonites are created
     // A new one is created as superman PASSES through the previous one which is ambiguous for scoring

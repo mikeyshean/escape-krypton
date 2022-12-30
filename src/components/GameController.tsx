@@ -7,7 +7,7 @@ import { useGameSessionContext } from '../context/GameSessionContext'
 const THEME_SONG_START_TIME = 46
 
 function GameController() {
-  const { gameSession, updateLocalHighScore } = useGameSessionContext()
+  const { gameSession, updateLocalHighScore, setGameSession } = useGameSessionContext()
   let themeSong: HTMLAudioElement
   let gameOverAudio: HTMLAudioElement
   let game: Game
@@ -22,8 +22,9 @@ function GameController() {
     gameOverAudio = new Audio("assets/soundfx/game_over.mp3")
   }
 
-  const createGameApi = trpc.game.start.useMutation();
-  const endGameApi = trpc.game.end.useMutation();
+  const createGameApi = trpc.game.start.useMutation()
+  const submitScoreApi = trpc.score.submit.useMutation()
+  const endGameApi = trpc.game.end.useMutation()
 
   // const prepareThemeSong() // useEffect here
   // getLeaders();
@@ -38,13 +39,15 @@ function GameController() {
     $restart = $el.find(".restart");
     $leaderList = $(".leaderboard-list")
 
+    // TODO: When we update gameSession state, it loads a new instance of game
+    console.log("Controller UseEffect")
     if (isValidGameState(canvasContext, $el, gameSession.id)) {
       enableThemeSongLooping()
       canvas = canvasContext!
       game = new Game(canvas, gameSession.highScore)
       showMenu()
     }
-  }, [gameSession])
+  }, [])
 
   function isValidGameState(context: CanvasRenderingContext2D|null, $gameWrapper: JQuery, sessionId: string): Boolean {
     return context !== null && $gameWrapper && sessionId.length > 0
@@ -59,7 +62,7 @@ function GameController() {
 
   function startGame() {
     resetEndgameMenu()
-    getGameId(gameSession.id)
+    createGameId(gameSession.id)
     run();
   };
   
@@ -143,7 +146,7 @@ function GameController() {
     })
   };
 
-  async function getGameId(sessionId: string) {
+  async function createGameId(sessionId: string) {
     const now = new Date().toISOString()
     const newGame = await createGameApi.mutateAsync({startedAt: now, sessionId: sessionId})
     gameId = newGame.id
@@ -157,8 +160,23 @@ function GameController() {
 
   function updateHighScore(score: number) {
     if (score > gameSession.highScore) {
-      updateLocalHighScore(score)
+      const newSession = {
+        ...gameSession,
+        bestGameId: gameId,
+        highScore: score
+      }
+      setGameSession(newSession)
+      updateLocalHighScore(score, gameId)
     }
+  }
+
+  function resetHighScore() {
+    game.resetHighScore()
+    const newSession = {...gameSession}
+    newSession.bestGameId = ''
+    newSession.highScore = 0
+    setGameSession(newSession)
+    updateLocalHighScore(0, '')
   }
 
   function showFinalScores() {
@@ -211,20 +229,12 @@ function GameController() {
 
   function submitScore(name: string|null) {
     if (name) {
-      const data = {
-        'name': name,
-        'score': game.getHighScore()
-      }
-      $.ajax({
-        type: "POST",
-        data: data,
-        url:"https://ms-leaderboards.herokuapp.com/leaders",
-        dataType: 'json',
-        success: (leaders) => {
-            // renderLeaderboard(leaders);
-            game.highScore = 0;
+      submitScoreApi.mutate({sessionId: gameSession.id, playerName: name, gameId: gameSession.bestGameId}, {
+        onSuccess: (data) => {
+          // renderLeaderboard(leaders);
+          // resetHighScore()
         }
-      });
+      })
     }
   };
 
@@ -273,8 +283,7 @@ function GameController() {
     bindKeys(undefined);
     $submitScore.one("click", (e) => {
       e.preventDefault();
-      const bestScore = gameSession.highScore;
-      submitScore(prompt(`Score: ${bestScore}`, "Enter your name"));
+      submitScore(prompt(`Score: ${gameSession.highScore}`, "Enter your name"));
       $restart.hide();
       $submitScore.hide();
       game.reset();

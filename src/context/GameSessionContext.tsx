@@ -9,12 +9,14 @@ const SESSION_KEY = 'kryptonite-session'
 type GameSession = {
   id: string,
   highScore: number,
+  bestGameId: string,
 }
 
 type GameSessionContextType = {
   createSession: () => void,
   gameSession: GameSession,
-  updateLocalHighScore: (highScore: number) => void
+  updateLocalHighScore: (highScore: number, gameId: string) => void
+  setGameSession: (gameSession: GameSession) => void
 }
 
 const GameSessionContext = React.createContext({} as GameSessionContextType);
@@ -25,7 +27,7 @@ function useGameSessionContext() {
 
 function GameSessionProvider({children}: {children: React.ReactNode}) {
 
-    const [gameSession, setGameSession] = useState({id: '', highScore: 0})
+    const [gameSession, setGameSession] = useState({id: '', highScore: 0, bestGameId: ''})
     const getSessionQuery = trpc.gameSession.get.useQuery({id: gameSession.id}, {retry: false})
     const createSessionQuery = trpc.gameSession.create.useMutation()
     
@@ -33,7 +35,7 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
         // Get or Create GameSession
         const storedSession = localStorage.getItem(SESSION_KEY) ? JSON.parse(localStorage.getItem(SESSION_KEY) as string) : ''
         if (storedSession) {
-            setGameSession({id: storedSession.id, highScore: storedSession.highScore})
+            setGameSession({id: storedSession.id, highScore: storedSession.highScore, bestGameId: storedSession.bestGameId})
         } else {
           createSession()
         }
@@ -55,7 +57,8 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
           value={{
             createSession,
             gameSession,
-            updateLocalHighScore: updateLocalHighScore,
+            updateLocalHighScore,
+            setGameSession: (gameSession: GameSession) => setGameSession(gameSession)
           }}
         >
          {children}
@@ -78,14 +81,14 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
 
     async function createSession() {
       const newSession = await createSessionQuery.mutateAsync(true)
-      localStorage.setItem(SESSION_KEY, JSON.stringify(newSession))
+      const gameSession = {...newSession, bestGameId: ''}
+      localStorage.setItem(SESSION_KEY, JSON.stringify(gameSession))
       
-      setGameSession(newSession)
+      setGameSession(gameSession)
     }
 
-    function updateLocalHighScore(highScore: number) {
-      const newLocalSession = {...gameSession}
-      newLocalSession.highScore = highScore
+    function updateLocalHighScore(highScore: number, gameId: string) {
+      const newLocalSession = {...gameSession, highScore: highScore, bestGameId: gameId}
       localStorage.setItem(SESSION_KEY, JSON.stringify(newLocalSession))
     }
 };
