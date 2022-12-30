@@ -9,18 +9,16 @@ class Game {
     height = 400;
     width = 800;
     kryptonitesCreated = 0;
-    highScore = 0;
     goingUp = true
     paused = false
     gameOver = false
     GRAVITY = .2;
 
     canvas: CanvasRenderingContext2D
-    constructor(canvas: CanvasRenderingContext2D, highScore: number) {
+    constructor(canvas: CanvasRenderingContext2D) {
       this.canvas = canvas
       this.superman = new Superman(this.canvas, this.GRAVITY)
       this.gamePieces = [this.superman]
-      this.highScore = highScore
     }
 
     draw(): void {
@@ -222,17 +220,17 @@ class Game {
     this.kryptonitesCreated = 0;
   };
 
-  getHighScore() {
-    if (this.getFinalScore() > this.highScore) {
-      this.highScore = this.getFinalScore()
-    }
+  // getHighScore() {
+  //   if (this.getFinalScore() > this.highScore) {
+  //     this.highScore = this.getFinalScore()
+  //   }
 
-    return this.highScore;
-  }
+  //   return this.highScore;
+  // }
 
-  resetHighScore() {
-    this.highScore = 0
-  }
+  // resetHighScore() {
+  //   this.highScore = 0
+  // }
 
   getCurrentScore() {
     return this.kryptonitesCreated > 0 ? this.kryptonitesCreated  - 1 : this.kryptonitesCreated

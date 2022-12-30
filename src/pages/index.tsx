@@ -1,11 +1,8 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useEffect, useState } from "react";
-import { trpc } from "../utils/trpc";
 import GameController from '../components/GameController'
-import $ from "jquery";
-import { string } from "zod";
-import { useGameSessionContext } from "../context/GameSessionContext";
+import { CanvasProvider } from "../context/CanvasContext";
+
 
 const Home: NextPage = () => {
 
@@ -18,7 +15,15 @@ const Home: NextPage = () => {
       </Head>
       <div className="window-container">
         <div className="main">
+
+        <div className="game-wrapper">
+          <canvas id="canvas" width="800" height="400"></canvas>
+          <span className="restart">Restart</span>
+          <span className="submit">Submit<br/> Score</span>
+        </div>
+        <CanvasProvider>
           <GameController />
+        </CanvasProvider>
         </div>
       </div>
     </>

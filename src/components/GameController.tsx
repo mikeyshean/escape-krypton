@@ -3,19 +3,22 @@ import Game from '../lib/Game'
 import { trpc } from "../utils/trpc";
 import $ from "jquery";
 import { useGameSessionContext } from '../context/GameSessionContext'
+import { useCanvasContext } from '../context/CanvasContext';
 
 const THEME_SONG_START_TIME = 46
 
 function GameController() {
-  const { gameSession, updateLocalHighScore, setGameSession } = useGameSessionContext()
+  const { gameSession, updateLocalHighScore } = useGameSessionContext()
+  const { canvas } = useCanvasContext()
   let themeSong: HTMLAudioElement
   let gameOverAudio: HTMLAudioElement
   let game: Game
   let $leaderList: JQuery
   let $submitScore: JQuery
   let $restart: JQuery
-  let canvas: CanvasRenderingContext2D
-  let gameId: string
+  let currentGameId: string
+  let bestGameId = gameSession.bestGameId
+  let highScore = gameSession.highScore
   
   if (typeof Audio != "undefined") { 
     themeSong = new Audio("assets/soundfx/superman_theme.mp3") as HTMLAudioElement
@@ -32,22 +35,27 @@ function GameController() {
 
   useEffect(() => {
     // Wait for mount before querying DOM
-    const canvasElement = document.getElementById('canvas') as HTMLCanvasElement;
-    const canvasContext = canvasElement.getContext('2d')
     const $el = $(".game-wrapper")
     $submitScore = $el.find(".submit")
     $restart = $el.find(".restart");
     $leaderList = $(".leaderboard-list")
 
-    // TODO: When we update gameSession state, it loads a new instance of game
-    console.log("Controller UseEffect")
-    if (isValidGameState(canvasContext, $el, gameSession.id)) {
+    if (isValidGameState(canvas, $el, gameSession.id)) {
       enableThemeSongLooping()
-      canvas = canvasContext!
-      game = new Game(canvas, gameSession.highScore)
+      game = new Game(canvas)
       showMenu()
     }
   }, [])
+
+  return (
+    <>
+      <div className="leaderboard">
+        <span className="leaderboard-title">Leaderboard</span>
+        <ul id="leaderboard-list" className="leaderboard-list">
+        </ul>
+      </div>
+    </>
+  )
 
   function isValidGameState(context: CanvasRenderingContext2D|null, $gameWrapper: JQuery, sessionId: string): Boolean {
     return context !== null && $gameWrapper && sessionId.length > 0
@@ -61,12 +69,13 @@ function GameController() {
   }
 
   function startGame() {
-    resetEndgameMenu()
-    createGameId(gameSession.id)
-    run();
-  };
+    resetEndGameMenu()
+    createGameId(gameSession.id).then(
+      () => { run() }
+    )
+  }
   
-  function resetEndgameMenu() {
+  function resetEndGameMenu() {
     $restart.hide();
     $submitScore.hide();
     $submitScore.off("click")
@@ -101,16 +110,19 @@ function GameController() {
   }
 
   function endGame(intervalId: NodeJS.Timer) {
-    game.draw() // Needed to redraw without score counter visible
+    game.draw() // Required to redraw without score counter visible
     
     clearInterval(intervalId);
-    validateEndGame(gameId, game.getFinalScore())
-    updateHighScore(game.getFinalScore())
-    playEndGameAudio()
-
-    setTimeout(() => {
-      showEndGameModal();
-    }, 300)
+    validateEndGame(currentGameId, game.getFinalScore()).then(
+      () => {
+        playEndGameAudio()
+        updateHighScore(game.getFinalScore())
+    
+        setTimeout(() => {
+          showEndGameModal();
+        }, 300)
+      }
+    )
   }
 
   function playEndGameAudio() {
@@ -149,7 +161,7 @@ function GameController() {
   async function createGameId(sessionId: string) {
     const now = new Date().toISOString()
     const newGame = await createGameApi.mutateAsync({startedAt: now, sessionId: sessionId})
-    gameId = newGame.id
+    currentGameId = newGame.id
   }
 
   async function validateEndGame(gameId: string, score: number) {
@@ -159,23 +171,16 @@ function GameController() {
   }
 
   function updateHighScore(score: number) {
-    if (score > gameSession.highScore) {
-      const newSession = {
-        ...gameSession,
-        bestGameId: gameId,
-        highScore: score
-      }
-      setGameSession(newSession)
-      updateLocalHighScore(score, gameId)
+    if (score > highScore) {
+      highScore = score
+      bestGameId = currentGameId
+      updateLocalHighScore(score, bestGameId)
     }
   }
 
   function resetHighScore() {
-    game.resetHighScore()
-    const newSession = {...gameSession}
-    newSession.bestGameId = ''
-    newSession.highScore = 0
-    setGameSession(newSession)
+    bestGameId = ''
+    highScore = 0
     updateLocalHighScore(0, '')
   }
 
@@ -198,13 +203,14 @@ function GameController() {
     canvas.fillStyle = "#fff"
     canvas.font = "18px 'Press Start 2P'"
 
-    const finalScore = game.getFinalScore()
     
     // Centers Score in score box
     const singleDigitPosition = 393
     const doubleDigitPosition = 383
     const tripleDigitPosition = 375
-
+    
+    // Current Game Score
+    const finalScore = game.getFinalScore()
     let xCoord = singleDigitPosition
     if (finalScore >= 100 ) {
       xCoord = tripleDigitPosition
@@ -215,24 +221,24 @@ function GameController() {
     canvas.fillText("Score", 358, 140);
     canvas.fillText(String(finalScore), xCoord, yFinalScorePosition);
 
-    const bestScore = game.getHighScore();
+    // Best Score
     xCoord = singleDigitPosition
-    if (bestScore >= 100 ) {
+    if (highScore >= 100 ) {
       xCoord = tripleDigitPosition
-    } else if (bestScore >= 10) {
+    } else if (highScore >= 10) {
       xCoord = doubleDigitPosition
     }
-    const yBestScorePosition = 225
+    const yHighScorePosition = 225
     canvas.fillText("Best", 368, 200);
-    canvas.fillText(String(bestScore), xCoord, yBestScorePosition);
+    canvas.fillText(String(highScore), xCoord, yHighScorePosition);
   };
 
   function submitScore(name: string|null) {
     if (name) {
-      submitScoreApi.mutate({sessionId: gameSession.id, playerName: name, gameId: gameSession.bestGameId}, {
+      submitScoreApi.mutate({sessionId: gameSession.id, playerName: name, gameId: bestGameId}, {
         onSuccess: (data) => {
           // renderLeaderboard(leaders);
-          // resetHighScore()
+          resetHighScore()
         }
       })
     }
@@ -283,7 +289,7 @@ function GameController() {
     bindKeys(undefined);
     $submitScore.one("click", (e) => {
       e.preventDefault();
-      submitScore(prompt(`Score: ${gameSession.highScore}`, "Enter your name"));
+      submitScore(prompt(`Score: ${highScore}`, "Enter your name"));
       $restart.hide();
       $submitScore.hide();
       game.reset();
@@ -334,20 +340,7 @@ function GameController() {
     )
   }
 
-  return (
-    <>
-      <div className="game-wrapper">
-        <canvas id="canvas" width="800" height="400"></canvas>
-        <span className="restart">Restart</span>
-        <span className="submit">Submit<br/> Score</span>
-      </div>
-      <div className="leaderboard">
-        <span className="leaderboard-title">Leaderboard</span>
-        <ul id="leaderboard-list" className="leaderboard-list">
-        </ul>
-      </div>
-    </>
-  )
+  
 }
 
 export default GameController

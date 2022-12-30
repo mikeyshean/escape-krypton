@@ -32,7 +32,7 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
     const createSessionQuery = trpc.gameSession.create.useMutation()
     
     useEffect(() => {
-        // Get or Create GameSession
+        // Get from local or Create GameSession
         const storedSession = localStorage.getItem(SESSION_KEY) ? JSON.parse(localStorage.getItem(SESSION_KEY) as string) : ''
         if (storedSession) {
             setGameSession({id: storedSession.id, highScore: storedSession.highScore, bestGameId: storedSession.bestGameId})
@@ -41,7 +41,7 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
         }
     }, [])
 
-    // Edge case for invalid local sessions, fallback to create new session
+    // Validate local session on backend
     verifyLocalSession()
 
     if (!isValidGameState()) {
@@ -66,6 +66,7 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
     );
 
     function verifyLocalSession() {
+      // Edge case for invalid local sessions falls back to create new session
       if (getSessionQuery.isError && localStorage.getItem(SESSION_KEY)) {
         const localSession = JSON.parse(localStorage.getItem(SESSION_KEY) as string)
         if (gameSession.id == localSession.id) {
