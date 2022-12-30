@@ -1,19 +1,20 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Game from '../lib/Game'
-import { trpc } from "../utils/trpc";
-import $ from "jquery";
+import { trpc } from "../utils/trpc"
+import $ from "jquery"
 import { useGameSessionContext } from '../context/GameSessionContext'
-import { useCanvasContext } from '../context/CanvasContext';
+import { useCanvasContext } from '../context/CanvasContext'
+import Leaderboard from './Leaderboard'
 
 const THEME_SONG_START_TIME = 46
 
 function GameController() {
   const { gameSession, updateLocalHighScore } = useGameSessionContext()
   const { canvas } = useCanvasContext()
+
   let themeSong: HTMLAudioElement
   let gameOverAudio: HTMLAudioElement
   let game: Game
-  let $leaderList: JQuery
   let $submitScore: JQuery
   let $restart: JQuery
   let currentGameId: string
@@ -27,18 +28,14 @@ function GameController() {
 
   const createGameApi = trpc.game.start.useMutation()
   const submitScoreApi = trpc.score.submit.useMutation()
+  const listScoresApi = trpc.score.list.useQuery()
   const endGameApi = trpc.game.end.useMutation()
-
-  // const prepareThemeSong() // useEffect here
-  // getLeaders();
-
 
   useEffect(() => {
     // Wait for mount before querying DOM
     const $el = $(".game-wrapper")
     $submitScore = $el.find(".submit")
-    $restart = $el.find(".restart");
-    $leaderList = $(".leaderboard-list")
+    $restart = $el.find(".restart")
 
     if (isValidGameState(canvas, $el, gameSession.id)) {
       enableThemeSongLooping()
@@ -47,25 +44,31 @@ function GameController() {
     }
   }, [])
 
+  let scores
+  if (listScoresApi.isSuccess) {
+    const { data } = listScoresApi
+    scores = data
+  }
+
   return (
     <>
-      <div className="leaderboard">
-        <span className="leaderboard-title">Leaderboard</span>
-        <ul id="leaderboard-list" className="leaderboard-list">
-        </ul>
-      </div>
+      {
+        scores && (
+          <Leaderboard scores={scores}/>
+        )
+      }
     </>
   )
 
-  function isValidGameState(context: CanvasRenderingContext2D|null, $gameWrapper: JQuery, sessionId: string): Boolean {
+  function isValidGameState(context: CanvasRenderingContext2D|null, $gameWrapper: JQuery, sessionId: string): boolean {
     return context !== null && $gameWrapper && sessionId.length > 0
   }
 
   function showMenu(): void {
     const intervalId = setInterval(() => {
-      game.drawMenu();
+      game.drawMenu()
     }, 20)
-    bindKeys(intervalId);
+    bindKeys(intervalId)
   }
 
   function startGame() {
@@ -76,8 +79,8 @@ function GameController() {
   }
   
   function resetEndGameMenu() {
-    $restart.hide();
-    $submitScore.hide();
+    $restart.hide()
+    $submitScore.hide()
     $submitScore.off("click")
     $restart.off("click")
   }
@@ -88,8 +91,8 @@ function GameController() {
     game.reset()
     game.addKryptonite()
 
-    canvas.lineJoin = "miter";
-    canvas.lineWidth = 1;
+    canvas.lineJoin = "miter"
+    canvas.lineWidth = 1
     const intervalId = setInterval(() => {
       if (!game.paused) {
         game.step()
@@ -100,35 +103,35 @@ function GameController() {
         endGame(intervalId)  
       }
     }, 1000/60)
-  };
+  }
 
   function playThemeSong() {
     if (themeSong.paused) {
       themeSong.currentTime = THEME_SONG_START_TIME
-      themeSong.play();
+      themeSong.play()
     }
   }
 
   function endGame(intervalId: NodeJS.Timer) {
     game.draw() // Required to redraw without score counter visible
     
-    clearInterval(intervalId);
+    clearInterval(intervalId)
     validateEndGame(currentGameId, game.getFinalScore()).then(
       () => {
         playEndGameAudio()
         updateHighScore(game.getFinalScore())
     
         setTimeout(() => {
-          showEndGameModal();
+          showEndGameModal()
         }, 300)
       }
     )
   }
 
   function playEndGameAudio() {
-    themeSong.pause();
-    gameOverAudio.currentTime = 0;
-    gameOverAudio.play();
+    themeSong.pause()
+    gameOverAudio.currentTime = 0
+    gameOverAudio.play()
 
   }
 
@@ -136,27 +139,27 @@ function GameController() {
     $(document).on("keydown", (e: JQuery.Event) => {
       switch (e.which) {
         case 38:
-          e.preventDefault();
-          clearInterval(intervalId);
-          startGame();
-          break;
+          e.preventDefault()
+          clearInterval(intervalId)
+          startGame()
+          break
 
         case 32:
-          e.preventDefault();
-          clearInterval(intervalId);
-          startGame();
-          break;
+          e.preventDefault()
+          clearInterval(intervalId)
+          startGame()
+          break
         default:
-          return;
+          return
       }
     })
 
     $("#canvas").on("click", (e: JQuery.Event) => {
-      e.preventDefault();
-      clearInterval(intervalId);
-      startGame();
+      e.preventDefault()
+      clearInterval(intervalId)
+      startGame()
     })
-  };
+  }
 
   async function createGameId(sessionId: string) {
     const now = new Date().toISOString()
@@ -187,14 +190,14 @@ function GameController() {
   function showFinalScores() {
     canvas.fillStyle = "#2e5280"
     canvas.strokeStyle = "#2e5280"
-    canvas.lineJoin = "round";
-    canvas.lineWidth = 10;
+    canvas.lineJoin = "round"
+    canvas.lineWidth = 10
 
     // outer score box
     roundRect(250, 100, 300, 200, 10)
 
-    canvas.fillStyle = "#B42420";
-    canvas.strokeStyle = "#B42420";
+    canvas.fillStyle = "#B42420"
+    canvas.strokeStyle = "#B42420"
 
     // restart button
     roundRect(270, 245, 120, 45, 10)
@@ -218,8 +221,8 @@ function GameController() {
       xCoord = doubleDigitPosition
     }
     const yFinalScorePosition = 165
-    canvas.fillText("Score", 358, 140);
-    canvas.fillText(String(finalScore), xCoord, yFinalScorePosition);
+    canvas.fillText("Score", 358, 140)
+    canvas.fillText(String(finalScore), xCoord, yFinalScorePosition)
 
     // Best Score
     xCoord = singleDigitPosition
@@ -229,97 +232,50 @@ function GameController() {
       xCoord = doubleDigitPosition
     }
     const yHighScorePosition = 225
-    canvas.fillText("Best", 368, 200);
-    canvas.fillText(String(highScore), xCoord, yHighScorePosition);
-  };
+    canvas.fillText("Best", 368, 200)
+    canvas.fillText(String(highScore), xCoord, yHighScorePosition)
+  }
 
   function submitScore(name: string|null) {
     if (name) {
       submitScoreApi.mutate({sessionId: gameSession.id, playerName: name, gameId: bestGameId}, {
         onSuccess: (data) => {
-          // renderLeaderboard(leaders);
+          // renderLeaderboard(leaders)
           resetHighScore()
         }
       })
     }
-  };
-
-  // getLeaders() {
-
-  //   $.ajax({
-  //     type: "GET",
-  //     url:"https://ms-leaderboards.herokuapp.com/leaders",
-  //     dataType: 'json',
-  //     success:function(leaders){
-  //         renderLeaderboard(leaders);
-  //     }.bind(this)
-  //   });
-  // };
-
-  // renderLeaderboard(leaders) {
-  //   $leaderList.empty();
-  //   const name, score, rank, leader;
-
-  //   for (const i = 0; i < 10; i++) {
-  //     leader = leaders[i];
-  //     rank = i + 1
-  //     const $li = $("<li>").addClass("group")
-  //     if (leader) {
-  //       name = leader["name"];
-  //       score = leader["score"];
-  //     } else {
-  //       name = "???"
-  //       score = "???"
-  //     }
-  //     const $nameSpan = $("<span>" + rank + ".  " + name + "</span>");
-  //     const $scoreSpan = $("<span>" + score + "</span>");
-  //     (rank < 10) ? $nameSpan.addClass("padding") : ""
-  //     $li.append($nameSpan).append($scoreSpan)
-  //     $leaderList.append($li)
-
-  //   }
-  // };
+  }
 
   function showEndGameModal() {
-    showFinalScores();
-    $restart.show();
-    $submitScore.show();
+    showFinalScores()
+    $restart.show()
+    $submitScore.show()
 
     // TODO: Check this
-    bindKeys(undefined);
+    bindKeys(undefined)
     $submitScore.one("click", (e) => {
-      e.preventDefault();
-      submitScore(prompt(`Score: ${highScore}`, "Enter your name"));
-      $restart.hide();
-      $submitScore.hide();
-      game.reset();
-      showMenu();
+      e.preventDefault()
+      submitScore(prompt(`Score: ${highScore}`, "Enter your name"))
+      $restart.hide()
+      $submitScore.hide()
+      game.reset()
+      showMenu()
     })
 
     $restart.one("click", (e) => {
-      e.preventDefault();
-      startGame();
-    })
-  }
-
-  function prepareThemeSong() {
-    enableThemeSongLooping()
-    
-    // Must wait for user click to play song
-    // https://developer.chrome.com/blog/autoplay/
-    $("window").on("click", () => {
-      themeSong.currentTime = THEME_SONG_START_TIME;
-      themeSong.play();
+      e.preventDefault()
+      startGame()
     })
   }
 
   function enableThemeSongLooping() {
     if (typeof themeSong.loop == 'boolean') {
-      themeSong.loop = true;
+      themeSong.loop = true
     } else {
       themeSong.addEventListener('ended',() => {
-        themeSong.currentTime = THEME_SONG_START_TIME;
-        themeSong.play();
+        themeSong.currentTime = THEME_SONG_START_TIME
+        themeSong.play()
       })
     }
   }

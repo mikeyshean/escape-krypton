@@ -1,18 +1,18 @@
 import Superman from './Superman'
-import Kryptonite from './Kryptonite';
-import $ from "jquery";
+import Kryptonite from './Kryptonite'
+import $ from "jquery"
 
 
 class Game {
     superman: Superman
     gamePieces: (Superman|Kryptonite)[]
-    height = 400;
-    width = 800;
-    kryptonitesCreated = 0;
+    height = 400
+    width = 800
+    kryptonitesCreated = 0
     goingUp = true
     paused = false
     gameOver = false
-    GRAVITY = .2;
+    GRAVITY = .2
 
     canvas: CanvasRenderingContext2D
     constructor(canvas: CanvasRenderingContext2D) {
@@ -23,63 +23,63 @@ class Game {
 
     draw(): void {
       // Main drawing of entire game state for each step
-      this.canvas.clearRect(0, 0, 800, 400);
+      this.canvas.clearRect(0, 0, 800, 400)
       
       this.gamePieces.forEach(function (object) {
-        object.draw();
+        object.draw()
       })
       if (this.gameOver) {
         this.hideScoreCounter()
       } else {
-        this.showScoreCounter();
+        this.showScoreCounter()
       }
-    };
+    }
 
     showScoreCounter() {
       const text = String(this.getCurrentScore())
       this.drawCounter(text)
-    };
+    }
 
     hideScoreCounter() {
       const text = ""
       this.drawCounter(text)
-    };
+    }
 
     drawMenu() {
       const canvas = this.canvas
-      canvas.clearRect(0, 0, 800, 400);
-      this.floatSuperman();
+      canvas.clearRect(0, 0, 800, 400)
+      this.floatSuperman()
 
-      canvas.fillStyle = "#2AE249";
-      canvas.strokeStyle = "#00CC00";
-      canvas.lineJoin = "miter";
-      canvas.lineWidth = 1;
+      canvas.fillStyle = "#2AE249"
+      canvas.strokeStyle = "#00CC00"
+      canvas.lineJoin = "miter"
+      canvas.lineWidth = 1
       canvas.font = "28px 'Press Start 2P'"
-      canvas.fillText("Escape from Krypton", 135, 75);
-      canvas.strokeText("Escape from Krypton", 135, 75);
+      canvas.fillText("Escape from Krypton", 135, 75)
+      canvas.strokeText("Escape from Krypton", 135, 75)
 
       canvas.font = "16px 'Press Start 2P'"
-      canvas.fillStyle = "#fff";
-      canvas.strokeStyle = "#2e5280";
-      canvas.fillText("Press 'space', 'up', or 'click' to fly", 95, 320);
-      canvas.strokeText("Press 'space', 'up', or 'click' to fly", 95, 320);
-      canvas.fillText("Don't hit the", 197, 355);
-      canvas.strokeText("Don't hit the", 197, 355);
+      canvas.fillStyle = "#fff"
+      canvas.strokeStyle = "#2e5280"
+      canvas.fillText("Press 'space', 'up', or 'click' to fly", 95, 320)
+      canvas.strokeText("Press 'space', 'up', or 'click' to fly", 95, 320)
+      canvas.fillText("Don't hit the", 197, 355)
+      canvas.strokeText("Don't hit the", 197, 355)
 
-      canvas.fillStyle = "#2AE249";
-      canvas.strokeStyle = "#00CC00";
-      canvas.fillText("Kryptonite!", 421, 355);
-      canvas.strokeText("Kryptonite!", 421, 355);
-      this.superman.draw();
-    };
+      canvas.fillStyle = "#2AE249"
+      canvas.strokeStyle = "#00CC00"
+      canvas.fillText("Kryptonite!", 421, 355)
+      canvas.strokeText("Kryptonite!", 421, 355)
+      this.superman.draw()
+    }
 
     step() {
-      this.moveObjects();
+      this.moveObjects()
       this.removeKryptonite()
-      this.checkCollisions();
-      this.checkGameOver();
-      this.tryAddKryptonite();
-    };
+      this.checkCollisions()
+      this.checkGameOver()
+      this.tryAddKryptonite()
+    }
 
     floatSuperman() {
       const supermanVelocity = this.superman.yVelocity
@@ -92,33 +92,33 @@ class Game {
       if (supermanVelocity < -1) {
         this.goingUp = false
       } else if (supermanVelocity > 2) {
-        this.goingUp = true;
+        this.goingUp = true
       }
-    };
+    }
 
     addKryptonite() {
       this.gamePieces.push(new Kryptonite(this.canvas, this.height, this.width))
       this.kryptonitesCreated++
-    };
+    }
 
     togglePause() {
       this.paused = !this.paused
-    };
+    }
 
     checkCollisions() {
       // TODO: This is unecessarily checking extra kryptonite
       this.gamePieces.forEach((object) => {
-        if (object instanceof Superman) { return; }
+        if (object instanceof Superman) { return }
 
         const kryptonite = object as Kryptonite
         if (this.isSideCollision(kryptonite) ||
             this.gapCollision(kryptonite) ||
             this.trigCollision(kryptonite)
         ) {
-          this.gameOver = true;
+          this.gameOver = true
         }
       })
-    };
+    }
 
     // See main README for visuals of what types of collision scenarios these cover
     private isSideCollision(kryptonite: Kryptonite) {
@@ -137,95 +137,95 @@ class Game {
               (this.superman.rightEdge() > kryptonite.leftEdge()) &&
               (this.superman.topEdge() < kryptonite.topKryptoniteBottomEdge() ||
               this.superman.yBottomRight() > kryptonite.bottomKryptoniteTopEdge())
-    };
+    }
 
     private trigCollision(kryptonite: Kryptonite) {
       return (this.superman.rightEdge() > kryptonite.rightEdge()) &&
               (this.superman.leftEdge() < kryptonite.rightEdge()) &&
               (this.superman.yBackEdge() > kryptonite.bottomKryptoniteTopEdge() ||
               (kryptonite.rightEdge() - this.superman.leftEdge()) > (this.superman.yBackEdge() - kryptonite.topKryptoniteBottomEdge()))
-    };
+    }
 
 
     bindKeys() {
       $(document).off("keydown")
-      $("#canvas").off("click");
+      $("#canvas").off("click")
       $(document).on("keydown", (e: JQuery.Event) => {
 
         switch (e.which) {
           case 38: // up
-            e.preventDefault();
+            e.preventDefault()
             this.superman.move(6.5, false)
-            break;
+            break
 
           case 32: // up
-            e.preventDefault();
+            e.preventDefault()
             this.superman.move(6.5, false)
-            break;
+            break
 
           case 80: // pause
-            e.preventDefault();
-            this.togglePause();
-            break;
+            e.preventDefault()
+            this.togglePause()
+            break
 
           default:
-            return;
+            return
         }
       })
 
       $("#canvas").on("click", (e:JQuery.Event) => {
-        e.preventDefault();
+        e.preventDefault()
         this.superman.move(6.5, false)
       })
-    };
+    }
 
     moveObjects() {
       this.gamePieces.forEach((object) => {
-        object.step();
+        object.step()
       })
-    };
+    }
 
     removeKryptonite() {
       const firstKryptonite = this.gamePieces[1]
       if (firstKryptonite?.isOffScreen()) {
         this.gamePieces.splice(1, 1)
       }
-    };
+    }
 
     drawCounter(text: string) {
       this.canvas.fillStyle = "#EA1821"
       this.canvas.strokeStyle = "#2e5280"
       this.canvas.font = "28px 'Press Start 2P'"
-      this.canvas.fillText(text, 390, 60);
-      this.canvas.strokeText(text, 390, 60);
+      this.canvas.fillText(text, 390, 60)
+      this.canvas.strokeText(text, 390, 60)
     }
 
     tryAddKryptonite() {
       // Adds next kryptonite when current one is halfway through game space
-      const lastKryptonite = this.gamePieces[this.gamePieces.length - 1];
+      const lastKryptonite = this.gamePieces[this.gamePieces.length - 1]
       if (lastKryptonite && lastKryptonite.xTopPosition < (this.width / 2)) {
-        this.addKryptonite();
+        this.addKryptonite()
       }
-  };
+  }
 
   checkGameOver(): void {
     this.gameOver || (this.gameOver = this.superman.isGone())
-  };
+  }
 
   reset() {
-    this.superman.reset();
+    this.superman.reset()
     this.bindKeys()
-    this.gamePieces = [this.superman];
-    this.gameOver = false;
-    this.kryptonitesCreated = 0;
-  };
+    this.gamePieces = [this.superman]
+    this.gameOver = false
+    this.kryptonitesCreated = 0
+  }
 
   // getHighScore() {
   //   if (this.getFinalScore() > this.highScore) {
   //     this.highScore = this.getFinalScore()
   //   }
 
-  //   return this.highScore;
+  //   return this.highScore
   // }
 
   // resetHighScore() {
@@ -244,6 +244,6 @@ class Game {
     // fully clearing. This is barely noticeable, but because of it we need to -1 here for the final score
     return this.getCurrentScore() > 0  ? this.getCurrentScore() - 1 : this.getCurrentScore()
   }
-};
+}
 
-export default Game;
+export default Game

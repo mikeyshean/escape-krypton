@@ -1,22 +1,21 @@
-const DIM = 33;
-const COLOR = "green";
-const MAX_VEL = -5.5;
-const START_POS_X = 400;
-const START_POS_Y = 200;
+const DIM = 33
+const MAX_VEL = -5.5
+const START_POS_X = 400
+const START_POS_Y = 200
 const START_VEL_X = 0
 const START_VEL_Y = 0
 
 class Superman {
 
-  xPosition = START_POS_X;
-  yPosition = START_POS_Y;
+  xPosition = START_POS_X
+  yPosition = START_POS_Y
   xTopPosition = START_POS_X
   yTopPosition = START_POS_Y - DIM
   yBackPosition = START_POS_Y
   xBackPosition = START_POS_X - DIM
-  dim = DIM;
-  image = new Image();
-  flySound = new Audio();
+  dim = DIM
+  image = new Image()
+  flySound = new Audio()
   xVelocity = START_VEL_X
   yVelocity = START_VEL_Y
   ctx: CanvasRenderingContext2D
@@ -37,17 +36,17 @@ class Superman {
     let sx: number
     let sy: number
     // ctx.strokeStyle = "#fff"
-    this.ctx.beginPath();
+    this.ctx.beginPath()
 
     if (yVel > 4 && yVel <= 8) {
-      sx = 218;
-      sy = 248;
+      sx = 218
+      sy = 248
     } else if (yVel > 8){
-      sx = 0;
-      sy = 214;
+      sx = 0
+      sy = 214
     } else {
-      sx = 0;
-      sy = 0;
+      sx = 0
+      sy = 0
     }
     
     this.ctx.drawImage(
@@ -60,14 +59,14 @@ class Superman {
       this.yPosition - DIM,
       40,
       40
-    );
-  };
+    )
+  }
 
   move(dir: number, floating: boolean): void {
     if (dir) {
       if (!floating) {
-        this.flySound.currentTime = 0;
-        this.flySound.play();
+        this.flySound.currentTime = 0
+        this.flySound.play()
       }
       if (this.yVelocity - dir > MAX_VEL) {
         this.yVelocity -= dir
@@ -76,7 +75,7 @@ class Superman {
       }
     }
     this.step()
-  };
+  }
 
   step(): void {
     this.yVelocity += this.gravity
@@ -103,7 +102,7 @@ class Superman {
   isOffScreen(): boolean {
     // Only used for kryptonite removal 
     return false
-  };
+  }
 
   yBackEdge(): number {
     return this.yBackPosition

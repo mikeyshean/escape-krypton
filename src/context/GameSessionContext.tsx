@@ -1,8 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from 'react'
-import { useRouter } from 'next/navigation'
-import { trpc } from "../utils/trpc";
-import Error from "next/error"
-import { SlowBuffer } from 'buffer';
+import React, { useState, useEffect, useContext } from 'react'
+import { trpc } from "../utils/trpc"
 
 const SESSION_KEY = 'kryptonite-session'
 
@@ -19,7 +16,7 @@ type GameSessionContextType = {
   setGameSession: (gameSession: GameSession) => void
 }
 
-const GameSessionContext = React.createContext({} as GameSessionContextType);
+const GameSessionContext = React.createContext({} as GameSessionContextType)
 
 function useGameSessionContext() {
     return useContext(GameSessionContext)
@@ -63,7 +60,7 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
         >
          {children}
         </GameSessionContext.Provider>
-    );
+    )
 
     function verifyLocalSession() {
       // Edge case for invalid local sessions falls back to create new session
@@ -92,6 +89,6 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
       const newLocalSession = {...gameSession, highScore: highScore, bestGameId: gameId}
       localStorage.setItem(SESSION_KEY, JSON.stringify(newLocalSession))
     }
-};
+}
 
 export { useGameSessionContext, GameSessionProvider }
