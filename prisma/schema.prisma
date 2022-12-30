@@ -32,7 +32,7 @@ model Game {
 
 model HighScores {
   id          String   @id @default(cuid())
-  score       DateTime
+  score       Int
   playerName  String
   submittedAt DateTime
   createdAt   DateTime @default(now())
