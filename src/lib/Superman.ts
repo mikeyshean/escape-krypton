@@ -108,15 +108,15 @@ class Superman {
     return this.yBackPosition
   }
 
-  leftEdge() {
+  xBackEdge() {
     return this.xBackPosition
   }
 
-  topEdge(): number {
+  yTopEdge(): number {
     return this.yTopPosition
   }
 
-  rightEdge(): number {
+  xRightEdge(): number {
     return this.xPosition
   }
   

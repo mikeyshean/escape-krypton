@@ -122,28 +122,48 @@ class Game {
 
     // See main README for visuals of what types of collision scenarios these cover
     private isSideCollision(kryptonite: Kryptonite) {
-      // Must be that the left edge is in between superman's hit box
-      // and he is either crossing above or below the gap boundaries
-      // Note: Top left of canvas is [0, 0]
+      // 1-2:  Check if the left edge of the kryptonite (x-coord) is between Superman's hitbox
+      //   AND
+      // (
+      //   3: Top of superman is above the top kryptonite's bottom edge
+      //   OR
+      //   4. Bottom of superman is below top edge of bottom kryptonite
+      // )
       
-      return (this.superman.rightEdge() > kryptonite.leftEdge()) &&
-            (this.superman.leftEdge() <= kryptonite.leftEdge()) &&
-            (this.superman.topEdge() < kryptonite.topKryptoniteBottomEdge() ||
-              this.superman.yBackEdge() > kryptonite.bottomKryptoniteTopEdge())
+      return (this.superman.xRightEdge() > kryptonite.leftEdge()) &&
+            (this.superman.xBackEdge() < kryptonite.leftEdge()) &&
+            (this.superman.yTopEdge() < kryptonite.topKryptoniteBottomEdge() ||
+              this.superman.yBottomRight() > kryptonite.bottomKryptoniteTopEdge())
     }
     
     private gapCollision(kryptonite: Kryptonite) {
-      return (this.superman.rightEdge() < kryptonite.rightEdge()) &&
-              (this.superman.rightEdge() > kryptonite.leftEdge()) &&
-              (this.superman.topEdge() < kryptonite.topKryptoniteBottomEdge() ||
+      // 1-2:  Check if Superman is inside the gap (x-axis)
+      //   AND
+      // (
+      //   3: Top of superman is above the top kryptonite's bottom edge
+      //   OR
+      //   4. Bottom of superman is below top edge of bottom kryptonite
+      // )
+      return this.superman.xRightEdge() < kryptonite.rightEdge() &&
+              this.superman.xRightEdge() > kryptonite.leftEdge() &&
+              (this.superman.yTopEdge() < kryptonite.topKryptoniteBottomEdge() ||
               this.superman.yBottomRight() > kryptonite.bottomKryptoniteTopEdge())
     }
 
     private trigCollision(kryptonite: Kryptonite) {
-      return (this.superman.rightEdge() > kryptonite.rightEdge()) &&
-              (this.superman.leftEdge() < kryptonite.rightEdge()) &&
-              (this.superman.yBackEdge() > kryptonite.bottomKryptoniteTopEdge() ||
-              (kryptonite.rightEdge() - this.superman.leftEdge()) > (this.superman.yBackEdge() - kryptonite.topKryptoniteBottomEdge()))
+      // 1-2:  Check if the right edge of the kryptonite (x-coord) is between Superman's hitbox
+      //   AND
+      // (
+      //   3: Bottom of superman is below top edge of bottom kryptonite
+      //   OR
+      //   4. Distance between kryptonite's right edge and superman's left edge (along x-axis) > 
+      //      Distance between superman's bottom edge and bottom edge of top kryptonite (y-axis)
+      //        (This calculation relies on the pythagoreum theorum applied to an isosceles right triangle)
+      // )
+      return this.superman.xRightEdge() > kryptonite.rightEdge() &&
+              this.superman.xBackEdge() < kryptonite.rightEdge() &&
+              (this.superman.yBottomRight() > kryptonite.bottomKryptoniteTopEdge() ||
+              (kryptonite.rightEdge() - this.superman.xBackEdge() > this.superman.yBottomRight() - kryptonite.topKryptoniteBottomEdge()))
     }
 
 
