@@ -47,7 +47,7 @@ network:
 #    deployment:            # The deployment strategy for the "test" environment.
 #       rolling: 'recreate' # Stops existing tasks before new ones are started for faster deployments.
 environments:
-  test:
+  production:
     secrets:
       DATABASE_URL:
-        secretsmanager: 'kryptondbclusterAuroraSecre-OX60EVzWKt7F:url::'
+        secretsmanager: 'kryptondbclusterAuroraSecre-4W2z6ElrgLWI:url::'
