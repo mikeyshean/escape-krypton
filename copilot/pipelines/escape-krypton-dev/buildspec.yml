@@ -18,8 +18,6 @@ phases:
   post_build:
     commands:
       - ls -l
-      - yarn prisma generate
-      - yarn prisma migrate deploy
       - export COLOR="false"
       - export CI="true"
       - pipeline=$(cat $CODEBUILD_SRC_DIR/copilot/pipelines/escape-krypton-dev/manifest.yml | ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))')
