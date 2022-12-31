@@ -32,9 +32,9 @@ phases:
           fi
         done;
       - ls -lah ./infrastructure
-    migrations:
-      commands:
-        - yarn prisma migrate deploy
+  migrations:
+    commands:
+      - yarn prisma migrate deploy
 artifacts:
   files:
     - "infrastructure/*"
