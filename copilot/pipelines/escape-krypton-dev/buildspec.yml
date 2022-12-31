@@ -17,6 +17,7 @@ phases:
       # - make test
   post_build:
     commands:
+      - npx prisma migrate deploy
       - ls -l
       - export COLOR="false"
       - export CI="true"
