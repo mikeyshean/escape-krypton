@@ -48,4 +48,4 @@ Here we detect when the top point or bottom edge of Superman collides with the t
 #### `trigCollision()`:
 Finally, we detect when the rear hypotenuse edge of Superman's hit box collides with the bottom edge of the top Kryptonite.
 
-![trigCollision](./public/assets//docs/trig_collision.png)
+![trigCollision](./public/assets/docs/trig_collision.png)
