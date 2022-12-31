@@ -17,7 +17,6 @@ phases:
       # - make test
   post_build:
     commands:
-      - yarn prisma migrate deploy
       - ls -l
       - export COLOR="false"
       - export CI="true"
@@ -33,6 +32,9 @@ phases:
           fi
         done;
       - ls -lah ./infrastructure
+    migrations:
+      commands:
+        - yarn prisma migrate deploy
 artifacts:
   files:
     - "infrastructure/*"
