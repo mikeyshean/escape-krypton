@@ -7,7 +7,7 @@ function ScoreBoard({ scores }: { scores: { id: string; playerName: string; scor
       <ul id="leaderboard-list" className="leaderboard-list">
         {
           scores && scores.map((score, idx) => {
-            const rank = 10-idx
+            const rank = idx + 1
             return (
               <li key={idx} className="group">
                 <span className={rank < 10 ? "padding" : ""}>{10-idx}. {score.playerName ?? "???"}</span>
