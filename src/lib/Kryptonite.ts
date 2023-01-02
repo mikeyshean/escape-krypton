@@ -1,5 +1,5 @@
 // All these constants are not necessary anymore, but I distinctly remember how helpful they were during development to 
-// aquickly test different settings I could adjust until I got the gameplay to feel just right.  Gravity in the Game class was a fun one
+// quickly test different settings until I got the gameplay to feel just right.
 const MAX_HEIGHT = 240
 const MIN_HEIGHT = 30
 const GAP_BETWEEN_KRYPTONITE = 88
@@ -21,8 +21,10 @@ class Kryptonite {
   yTopPosition: number
   image = new Image()
   canvas: CanvasRenderingContext2D
+  id: number
 
-  constructor(canvas: CanvasRenderingContext2D, game_height: number, game_width: number) {
+  constructor(id: number, canvas: CanvasRenderingContext2D, game_height: number, game_width: number) {
+    this.id = id
     // game_height and game_width are used as inital reference points to know where to start 
     // our first stroke onto the canvas to enter the game.  Allows for potentially exploring
     // different canvas sizes
