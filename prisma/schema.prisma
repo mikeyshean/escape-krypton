@@ -21,13 +21,12 @@ model GameSession {
 
 model Game {
   id        String      @id @default(cuid())
-  startedAt DateTime
+  startedAt DateTime    @default(now())
   endedAt   DateTime?
   score     Int?
   validated Boolean     @default(false)
   session   GameSession @relation("Games", fields: [sessionId], references: [id])
   sessionId String
-  
 }
 
 model HighScores {
@@ -38,5 +37,5 @@ model HighScores {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([score])
+  @@index(fields: [submittedAt(sort: Desc), score(sort: Desc)])
 }

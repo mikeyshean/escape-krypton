@@ -8,11 +8,13 @@ class Game {
     gamePieces: (Superman|Kryptonite)[]
     height = 400
     width = 800
-    kryptonitesCreated = 0
     goingUp = true
     paused = false
     gameOver = false
     GRAVITY = .2
+    nextKryptoniteId = 1
+    kryptoniteScore = new Set<number>()
+    stepCount = 0
 
     canvas: CanvasRenderingContext2D
     constructor(canvas: CanvasRenderingContext2D) {
@@ -36,7 +38,7 @@ class Game {
     }
 
     showScoreCounter() {
-      const text = String(this.getCurrentScore())
+      const text = String(this.currentScore())
       this.drawCounter(text)
     }
 
@@ -79,6 +81,8 @@ class Game {
       this.checkCollisions()
       this.checkGameOver()
       this.tryAddKryptonite()
+      this.updateScore()
+      this.stepCount++
     }
 
     floatSuperman() {
@@ -96,17 +100,11 @@ class Game {
       }
     }
 
-    addKryptonite() {
-      this.gamePieces.push(new Kryptonite(this.canvas, this.height, this.width))
-      this.kryptonitesCreated++
-    }
-
     togglePause() {
       this.paused = !this.paused
     }
 
     checkCollisions() {
-      // TODO: This is unecessarily checking extra kryptonite
       this.gamePieces.forEach((object) => {
         if (object instanceof Superman) { return }
 
@@ -118,6 +116,21 @@ class Game {
           this.gameOver = true
         }
       })
+    }
+
+    updateScore() {
+      this.gamePieces.forEach((object) => {
+        if (object instanceof Superman) { return }
+
+        const kryptonite = object as Kryptonite
+        if (this.isScoredKryptonite(kryptonite)) {
+          this.kryptoniteScore.add(kryptonite.id)
+        }
+      })
+    }
+
+    isScoredKryptonite(kryptonite: Kryptonite) {
+      return this.superman.xBackEdge() > kryptonite.rightEdge()
     }
 
     // See main README for visuals of what types of collision scenarios these cover
@@ -223,9 +236,21 @@ class Game {
     tryAddKryptonite() {
       // Adds next kryptonite when current one is halfway through game space
       const lastKryptonite = this.gamePieces[this.gamePieces.length - 1]
-      if (lastKryptonite && lastKryptonite.xTopPosition < (this.width / 2)) {
+      if (lastKryptonite && 
+        this.isKryptonite(lastKryptonite) && 
+        lastKryptonite.leftEdge() < (this.width / 2)
+      ) {
         this.addKryptonite()
       }
+  }
+
+  isKryptonite(object: Superman | Kryptonite): object is Kryptonite {
+    return object instanceof Kryptonite
+  }
+
+  addKryptonite() {
+    this.gamePieces.push(new Kryptonite(this.nextKryptoniteId, this.canvas, this.height, this.width))
+    this.nextKryptoniteId++
   }
 
   checkGameOver(): void {
@@ -237,32 +262,13 @@ class Game {
     this.bindKeys()
     this.gamePieces = [this.superman]
     this.gameOver = false
-    this.kryptonitesCreated = 0
+    this.nextKryptoniteId = 1
+    this.kryptoniteScore.clear()
+    this.stepCount = 0
   }
 
-  // getHighScore() {
-  //   if (this.getFinalScore() > this.highScore) {
-  //     this.highScore = this.getFinalScore()
-  //   }
-
-  //   return this.highScore
-  // }
-
-  // resetHighScore() {
-  //   this.highScore = 0
-  // }
-
-  getCurrentScore() {
-    return this.kryptonitesCreated > 0 ? this.kryptonitesCreated  - 1 : this.kryptonitesCreated
-  }
-
-  // TODO: This is all wrong if superman falls off the map between kryptonites.  
-  getFinalScore() {
-    // We need this because the currentScore is calculated as new kryptonites are created
-    // A new one is created as superman PASSES through the previous one which is ambiguous for scoring
-    // You may have noticed the score counter during the game is updated as superman enters the gap without
-    // fully clearing. This is barely noticeable, but because of it we need to -1 here for the final score
-    return this.getCurrentScore() > 0  ? this.getCurrentScore() - 1 : this.getCurrentScore()
+  currentScore() {
+    return this.kryptoniteScore.size
   }
 }
 

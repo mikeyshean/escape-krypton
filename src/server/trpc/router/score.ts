@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Prisma } from '@prisma/client';
-
+import { TRPCError } from '@trpc/server';
 import { router, publicProcedure } from "../trpc";
 
 const defaultScoreSelect = Prisma.validator<Prisma.HighScoresSelect>()({
@@ -38,21 +38,31 @@ export const scoreRouter = router({
       
       const game = await ctx.prisma.game.findUnique({
         where: {
-          id: gameId
+          id: gameId,
+          sessionId: sessionId,
+          validated: true,
+          score: {
+            gt: 0
+          }
         },
         select: defaultGameSelect
       })
-      
-      if (game && game.sessionId == sessionId) {
-        const highScore = await ctx.prisma.highScores.create({
-          data: {
-            score: game.score!,
-            playerName: playerName,
-            submittedAt: new Date()
-          },
-          select: defaultScoreSelect
+
+      if (!game) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: `Game not found`
         })
-        return highScore
       }
+      
+      const highScore = await ctx.prisma.highScores.create({
+        data: {
+          score: game.score!,
+          playerName: playerName,
+          submittedAt: new Date()
+        },
+        select: defaultScoreSelect
+      })
+      return highScore
     })
 })

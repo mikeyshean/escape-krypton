@@ -13,7 +13,6 @@ class Superman {
   yTopPosition = START_POS_Y - DIM
   yBackPosition = START_POS_Y
   xBackPosition = START_POS_X - DIM
-  dim = DIM
   image = new Image()
   flySound = new Audio()
   xVelocity = START_VEL_X
@@ -89,7 +88,6 @@ class Superman {
   }
 
   reset(): void {
-    this.xPosition = START_POS_X
     this.yPosition = START_POS_Y
     this.xTopPosition = START_POS_X
     this.yTopPosition = START_POS_Y - DIM
