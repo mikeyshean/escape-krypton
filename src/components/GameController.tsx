@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import Game from '../lib/Game'
 import { trpc } from "../utils/trpc"
 import $ from "jquery"
@@ -15,9 +15,9 @@ function GameController() {
 
   let themeSong: HTMLAudioElement
   let gameOverAudio: HTMLAudioElement
-  let game: Game
-  let $submitScore: JQuery
-  let $restart: JQuery
+  const game = useRef<Game|null>(null)
+  const $submitScore = useRef<JQuery|null>(null)
+  const $restart = useRef<JQuery|null>(null)
   let currentGameId: string
   let bestGameId = gameSession.bestGameId
   let highScore = gameSession.highScore
@@ -37,12 +37,12 @@ function GameController() {
   useEffect(() => {
     // Wait for mount before querying DOM
     const $el = $(".game-wrapper")
-    $submitScore = $el.find(".submit")
-    $restart = $el.find(".restart")
+    $submitScore.current = $el.find(".submit")
+    $restart.current = $el.find(".restart")
 
     if (isValidGameState(canvas, $el, gameSession.id)) {
       enableThemeSongLooping()
-      game = new Game(canvas)
+      game.current = new Game(canvas)
       showMenu()
     }
   }, [])
@@ -69,7 +69,7 @@ function GameController() {
 
   function showMenu(): void {
     const intervalId = setInterval(() => {
-      game.drawMenu()
+      game.current?.drawMenu()
     }, 20)
     bindKeys(intervalId)
   }
@@ -82,29 +82,29 @@ function GameController() {
   }
   
   function resetEndGameMenu() {
-    $restart.hide()
-    $submitScore.hide()
-    $submitScore.off("click")
-    $restart.off("click")
+    $restart.current?.hide()
+    $submitScore.current?.hide()
+    $submitScore.current?.off("click")
+    $restart.current?.off("click")
   }
 
   function run(): void {
     playThemeSong()
 
-    game.reset()
-    game.addKryptonite()
+    game.current?.reset()
+    game.current?.addKryptonite()
 
     canvas.lineJoin = "miter"
     canvas.lineWidth = 1
     gameStartedAt = Date.now()
 
     const intervalId = setInterval(() => {
-      if (!game.paused) {
-        game.step()
-        game.draw()
+      if (!game.current?.paused) {
+        game.current?.step()
+        game.current?.draw()
       }
 
-      if (game.gameOver) {
+      if (game.current?.gameOver) {
         gameEndedAt = Date.now()
         endGame(intervalId)  
       }
@@ -119,13 +119,13 @@ function GameController() {
   }
 
   function endGame(intervalId: NodeJS.Timer) {
-    game.draw() // Required to redraw without score counter visible
+    game.current?.draw() // Required to redraw without score counter visible
     
     clearInterval(intervalId)
-    validateEndGame(currentGameId, game.currentScore(), gameStartedAt, gameEndedAt).then(
+    validateEndGame(currentGameId, game.current!.currentScore(), gameStartedAt, gameEndedAt).then(
       () => {
         playEndGameAudio()
-        updateHighScore(game.currentScore())
+        updateHighScore(game.current!.currentScore())
     
         setTimeout(() => {
           showEndGameModal()
@@ -173,14 +173,13 @@ function GameController() {
   }
 
   async function validateEndGame(gameId: string, score: number, gameStartedAt: number, gameEndedAt: number) {
-    const now = new Date().toISOString()
     const validGame = await endGameApi.mutateAsync({
       id: gameId, 
       score: score, 
       sessionId: gameSession.id,
       gameEndedAt: gameEndedAt, 
       gameStartedAt: gameStartedAt, 
-      stepCount: game.stepCount
+      stepCount: game.current!.stepCount
     })
     return validGame 
   }
@@ -225,7 +224,7 @@ function GameController() {
     const tripleDigitPosition = 375
     
     // Current Game Score
-    const currentScore = game.currentScore()
+    const currentScore = game.current!.currentScore()
     let xCoord = singleDigitPosition
     if (currentScore >= 100 ) {
       xCoord = tripleDigitPosition
@@ -251,7 +250,7 @@ function GameController() {
   function submitScore(name: string|null) {
     if (name) {
       submitScoreApi.mutate({sessionId: gameSession.id, playerName: name, gameId: bestGameId}, {
-        onSuccess: (data) => {
+        onSuccess: () => {
           // renderLeaderboard(leaders)
           resetHighScore()
         }
@@ -261,21 +260,21 @@ function GameController() {
 
   function showEndGameModal() {
     showEndGameScores()
-    $restart.show()
-    $submitScore.show()
+    $restart.current?.show()
+    $submitScore.current?.show()
 
     // TODO: Check this
     bindKeys(undefined)
-    $submitScore.one("click", (e) => {
+    $submitScore.current?.one("click", (e) => {
       e.preventDefault()
       submitScore(prompt(`Score: ${highScore}`, "Enter your name"))
-      $restart.hide()
-      $submitScore.hide()
-      game.reset()
+      $restart.current?.hide()
+      $submitScore.current?.hide()
+      game.current?.reset()
       showMenu()
     })
 
-    $restart.one("click", (e) => {
+    $restart.current?.one("click", (e) => {
       e.preventDefault()
       startGame()
     })

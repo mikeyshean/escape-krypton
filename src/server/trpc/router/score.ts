@@ -18,7 +18,7 @@ const defaultGameSelect = Prisma.validator<Prisma.GameSelect>()({
 export const scoreRouter = router({
   list: publicProcedure
     .input(z.undefined())
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx }) => {
       
       const scores = await ctx.prisma.highScores.findMany({
         select: defaultScoreSelect,

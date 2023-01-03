@@ -12,7 +12,7 @@ const defaultSessionSelect = Prisma.validator<Prisma.GameSessionSelect>()({
 export const gameSessionRouter = router({
   create: publicProcedure
     .input(z.boolean())
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx }) => {
       const game = await ctx.prisma.gameSession.create({
         data: {},
         select: defaultSessionSelect

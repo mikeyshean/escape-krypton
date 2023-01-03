@@ -50,7 +50,7 @@ function hasValidStepCount(game: {
   // Try tp validate client game step count based on game duration
 
   const gameDuration = gameEndedAt - gameStartedAt
-  let estimatedStepsInGame = gameDuration / (1000/60)
+  const estimatedStepsInGame = gameDuration / (1000/60)
   const stepCountDiff = estimatedStepsInGame / stepCount
   const marginOfError = .06
   if (1 - stepCountDiff > marginOfError) {

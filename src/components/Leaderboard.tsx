@@ -10,7 +10,7 @@ function ScoreBoard({ scores }: { scores: { id: string; playerName: string; scor
             const rank = idx + 1
             return (
               <li key={idx} className="group">
-                <span className={rank < 10 ? "padding" : ""}>{10-idx}. {score.playerName ?? "???"}</span>
+                <span className={rank < 10 ? "padding" : ""}>{rank}. {score.playerName ?? "???"}</span>
                 <span>{score.score ?? "???"}</span>
               </li>
             )
