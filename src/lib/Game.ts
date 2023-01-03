@@ -14,6 +14,7 @@ class Game {
     GRAVITY = .2
     nextKryptoniteId = 1
     kryptoniteScore = new Set<number>()
+    stepCount = 0
 
     canvas: CanvasRenderingContext2D
     constructor(canvas: CanvasRenderingContext2D) {
@@ -81,6 +82,7 @@ class Game {
       this.checkGameOver()
       this.tryAddKryptonite()
       this.updateScore()
+      this.stepCount++
     }
 
     floatSuperman() {
@@ -96,11 +98,6 @@ class Game {
       } else if (supermanVelocity > 2) {
         this.goingUp = true
       }
-    }
-
-    addKryptonite() {
-      this.gamePieces.push(new Kryptonite(this.nextKryptoniteId, this.canvas, this.height, this.width))
-      this.nextKryptoniteId++
     }
 
     togglePause() {
@@ -239,9 +236,21 @@ class Game {
     tryAddKryptonite() {
       // Adds next kryptonite when current one is halfway through game space
       const lastKryptonite = this.gamePieces[this.gamePieces.length - 1]
-      if (lastKryptonite && lastKryptonite.xTopPosition < (this.width / 2)) {
+      if (lastKryptonite && 
+        this.isKryptonite(lastKryptonite) && 
+        lastKryptonite.leftEdge() < (this.width / 2)
+      ) {
         this.addKryptonite()
       }
+  }
+
+  isKryptonite(object: Superman | Kryptonite): object is Kryptonite {
+    return object instanceof Kryptonite
+  }
+
+  addKryptonite() {
+    this.gamePieces.push(new Kryptonite(this.nextKryptoniteId, this.canvas, this.height, this.width))
+    this.nextKryptoniteId++
   }
 
   checkGameOver(): void {
@@ -255,6 +264,7 @@ class Game {
     this.gameOver = false
     this.nextKryptoniteId = 1
     this.kryptoniteScore.clear()
+    this.stepCount = 0
   }
 
   currentScore() {

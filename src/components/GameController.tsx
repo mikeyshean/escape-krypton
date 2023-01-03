@@ -21,6 +21,8 @@ function GameController() {
   let currentGameId: string
   let bestGameId = gameSession.bestGameId
   let highScore = gameSession.highScore
+  let gameStartedAt: number
+  let gameEndedAt: number
   
   if (typeof Audio != "undefined") { 
     themeSong = new Audio("assets/soundfx/superman_theme.mp3") as HTMLAudioElement
@@ -94,6 +96,8 @@ function GameController() {
 
     canvas.lineJoin = "miter"
     canvas.lineWidth = 1
+    gameStartedAt = Date.now()
+
     const intervalId = setInterval(() => {
       if (!game.paused) {
         game.step()
@@ -101,6 +105,7 @@ function GameController() {
       }
 
       if (game.gameOver) {
+        gameEndedAt = Date.now()
         endGame(intervalId)  
       }
     }, 1000/FRAMES_PER_SECOND)
@@ -117,7 +122,7 @@ function GameController() {
     game.draw() // Required to redraw without score counter visible
     
     clearInterval(intervalId)
-    validateEndGame(currentGameId, game.currentScore()).then(
+    validateEndGame(currentGameId, game.currentScore(), gameStartedAt, gameEndedAt).then(
       () => {
         playEndGameAudio()
         updateHighScore(game.currentScore())
@@ -163,14 +168,20 @@ function GameController() {
   }
 
   async function createGameId(sessionId: string) {
-    const now = new Date().toISOString()
-    const newGame = await createGameApi.mutateAsync({startedAt: now, sessionId: sessionId})
+    const newGame = await createGameApi.mutateAsync({sessionId: sessionId})
     currentGameId = newGame.id
   }
 
-  async function validateEndGame(gameId: string, score: number) {
+  async function validateEndGame(gameId: string, score: number, gameStartedAt: number, gameEndedAt: number) {
     const now = new Date().toISOString()
-    const validGame = await endGameApi.mutateAsync({id: gameId, endedAt: now, score: score, sessionId: gameSession.id})
+    const validGame = await endGameApi.mutateAsync({
+      id: gameId, 
+      score: score, 
+      sessionId: gameSession.id,
+      gameEndedAt: gameEndedAt, 
+      gameStartedAt: gameStartedAt, 
+      stepCount: game.stepCount
+    })
     return validGame 
   }
 

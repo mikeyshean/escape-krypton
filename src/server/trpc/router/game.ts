@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { Prisma } from '@prisma/client';
-import isValidGame from '../../validateGame'
-
 import { router, publicProcedure } from "../trpc";
+import { TRPCError } from '@trpc/server';
+import isValidGame from '../../validateGame'
 
 const startGameSelect = Prisma.validator<Prisma.GameSelect>()({
   id: true
@@ -12,19 +12,18 @@ const endGameSelect = Prisma.validator<Prisma.GameSelect>()({
   id: true,
   startedAt: true,
   endedAt: true,
-  sessionId: true
+  sessionId: true,
+  score: true
 });
 
 export const gameRouter = router({
   start: publicProcedure
-    .input(z.object({sessionId: z.string(), startedAt: z.string().datetime()}))
+    .input(z.object({sessionId: z.string()}))
     .mutation(async ({ ctx, input }) => {
-      const startedAt = input.startedAt
       const sessionId = input.sessionId
       
       const game = await ctx.prisma.game.create({
         data: {
-          startedAt: startedAt,
           sessionId: sessionId
         },
         select: startGameSelect
@@ -32,29 +31,74 @@ export const gameRouter = router({
       return game
     }),
   end: publicProcedure
-    .input(z.object({id: z.string(), endedAt: z.string().datetime(), score: z.number(), sessionId: z.string()}))
+    .input(z.object({
+      id: z.string(), 
+      score: z.number(), 
+      sessionId: z.string(),
+      gameStartedAt: z.number(), 
+      gameEndedAt: z.number(), 
+      stepCount: z.number()
+    }))
     .mutation(async ({ctx, input}) => {
       const id = input.id
       const score = input.score
-      const endedAt = input.endedAt
       const sessionId = input.sessionId
+      const endedAt = new Date()
+      const gameStartedAt = input.gameStartedAt
+      const gameEndedAt = input.gameEndedAt
+      const stepCount = input.stepCount
 
-      const game = await ctx.prisma.game.update({
-        where: {
-          id: id,
-          sessionId: sessionId
-        },
-        data: {
-          endedAt: endedAt,
-          score: score
-        },
-        select: endGameSelect
+      return await ctx.prisma.$transaction(async (tx) => {
+        const existingGame = ctx.prisma.game.findUnique({
+          where: {
+            id: id,
+            sessionId: sessionId,
+            endedAt: null
+          }
+        })
+  
+        if (!existingGame) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Valid game not found, update failed'
+  
+          })
+        }
+
+        const game = await ctx.prisma.game.update({
+          where: {
+            id: id,
+            sessionId: sessionId
+          },
+          data: {
+            endedAt: endedAt,
+            score: score
+          },
+          select: endGameSelect
+        })
+        
+        if (!isValidGame(game, gameStartedAt, gameEndedAt, stepCount)) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: `GameID: ${game.id} is invalid! Are you trying to hack my game?!`
+          })
+        }
+
+        const validatedGame = ctx.prisma.game.update({
+          where: {
+            id: id
+          },
+          data: {
+            validated: true
+          }
+        })
+
+        return validatedGame
       })
-      
-      if (isValidGame(game)) {
-        return game 
-      } else {
-        console.log("H4x0r")
-      }
+
     })
+
+    
+
+  
 });
