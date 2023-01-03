@@ -48,7 +48,7 @@ export const gameRouter = router({
       const gameEndedAt = input.gameEndedAt
       const stepCount = input.stepCount
 
-      return await ctx.prisma.$transaction(async (tx) => {
+      return await ctx.prisma.$transaction(async () => {
         const existingGame = ctx.prisma.game.findUnique({
           where: {
             id: id,
