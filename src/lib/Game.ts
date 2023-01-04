@@ -57,8 +57,8 @@ class Game {
       canvas.lineJoin = "miter"
       canvas.lineWidth = 1
       canvas.font = "28px 'Press Start 2P'"
-      canvas.fillText("Escape from Krypton", 135, 75)
-      canvas.strokeText("Escape from Krypton", 135, 75)
+      canvas.strokeText("Escape Krypton", 200, 75)
+      canvas.fillText("Escape Krypton", 205, 75)
 
       canvas.font = "16px 'Press Start 2P'"
       canvas.fillStyle = "#fff"

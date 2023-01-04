@@ -49,7 +49,7 @@
 /* Kryptonite Game Styles */
 body, .window-container {
   text-align: center;
-  background-image: url("../../public/assets/bg.jpg");
+  background: url("../../public/assets/bg.jpg") no-repeat fixed; 
   background-size: cover;
 }
 
