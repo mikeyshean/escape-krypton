@@ -53,9 +53,6 @@ body, .window-container {
   background-size: cover;
 }
 
-.main {
-  display: inline-block;
-}
 ul {
   list-style: none;
 }
@@ -73,7 +70,7 @@ span {
 }
 
 #canvas {
-  background: #23262b;
+  background: black;
   border: 5px solid #00CC00;
   display: inline-block;
   margin-top: 50px;

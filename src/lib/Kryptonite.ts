@@ -1,9 +1,10 @@
+import { Constants } from '../constants'
+
 // All these constants are not necessary anymore, but I distinctly remember how helpful they were during development to 
 // quickly test different settings until I got the gameplay to feel just right.
 const MAX_HEIGHT = 240
 const MIN_HEIGHT = 30
 const GAP_BETWEEN_KRYPTONITE = 88
-const STEP_AMOUNT = 2.6
 
 // This extra "collision" padding is added to edges when we draw on canvas.
 // Later when we calculate for collision detection we use the instance's original edge dimensions.
@@ -72,8 +73,8 @@ class Kryptonite {
   }
 
   step() {
-    this.xTopPosition -= STEP_AMOUNT
-    this.xBottomPosition -= STEP_AMOUNT
+    this.xTopPosition -= Constants.SCROLLING_STEP_AMOUNT
+    this.xBottomPosition -= Constants.SCROLLING_STEP_AMOUNT
   }
   
   isOffScreen(): boolean {
