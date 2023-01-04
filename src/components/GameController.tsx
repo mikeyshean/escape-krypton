@@ -32,7 +32,7 @@ function GameController() {
 
   const createGameApi = trpc.game.start.useMutation()
   const submitScoreApi = trpc.score.submit.useMutation()
-  const listScoresApi = trpc.score.list.useQuery(undefined, { refetchInterval: 5000, refetchIntervalInBackground: false})
+  const listScoresApi = trpc.score.list.useQuery(undefined, { refetchInterval: 7000, refetchIntervalInBackground: false})
   const endGameApi = trpc.game.end.useMutation()
 
   useEffect(() => {
