@@ -318,7 +318,6 @@ class Game {
       const limit = config.limit
       const interval = config.interval
       if (this.currentScore() >= config.minScore && config.queue.size() < limit && this.stepCount % interval == 0) {
-        console.log(`${key} size: ${config.queue.size()}, limit: ${limit}`)
         config.queue.add(new config.object(this.canvas, this.height, this.width))
       }
     }
