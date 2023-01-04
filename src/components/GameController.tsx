@@ -12,6 +12,7 @@ const FRAMES_PER_SECOND = 60
 function GameController() {
   const { gameSession, updateLocalHighScore } = useGameSessionContext()
   const { canvas } = useCanvasContext()
+  const utils = trpc.useContext();
 
   let themeSong: HTMLAudioElement
   let gameOverAudio: HTMLAudioElement
@@ -31,7 +32,7 @@ function GameController() {
 
   const createGameApi = trpc.game.start.useMutation()
   const submitScoreApi = trpc.score.submit.useMutation()
-  const listScoresApi = trpc.score.list.useQuery()
+  const listScoresApi = trpc.score.list.useQuery(undefined, { refetchInterval: 5000, refetchIntervalInBackground: false})
   const endGameApi = trpc.game.end.useMutation()
 
   useEffect(() => {
@@ -251,7 +252,7 @@ function GameController() {
     if (name) {
       submitScoreApi.mutate({sessionId: gameSession.id, playerName: name, gameId: bestGameId}, {
         onSuccess: () => {
-          // renderLeaderboard(leaders)
+          utils.score.invalidate()
           resetHighScore()
         }
       })
