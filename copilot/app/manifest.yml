@@ -51,4 +51,5 @@ environments:
     production:
       secrets:
         DATABASE_URL:
-          secretsmanager: 'kryptonclusterAuroraSecret-TYtMekn1joIE:url::'
+          secretsmanager: 'krypton-free-rds:url::'
+          # secretsmanager: 'kryptonclusterAuroraSecret-TYtMekn1joIE:url::'
