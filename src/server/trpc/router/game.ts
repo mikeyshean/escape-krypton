@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Prisma } from '@prisma/client';
 import { router, publicProcedure } from "../trpc";
 import { TRPCError } from '@trpc/server';
-import isValidGame from '../../validateGame'
+import isValidGame from '../../validate_game'
 
 const startGameSelect = Prisma.validator<Prisma.GameSelect>()({
   id: true

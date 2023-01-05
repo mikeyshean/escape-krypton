@@ -1,28 +1,32 @@
-import { type NextPage } from "next";
+import { type NextPage, GetStaticPropsContext } from "next"
 import Head from "next/head";
-import { useEffect, useRef } from "react";
+import superjson from 'superjson';
+import { createProxySSGHelpers } from '@trpc/react-query/ssg'
 import GameController from '../components/GameController'
-import { CanvasProvider } from "../context/CanvasContext";
+import { CanvasProvider } from "../context/CanvasContext"
+import { appRouter } from '../server/trpc/router/_app'
+import { createContextInner } from '../server/trpc/context'
+import { trpc } from "../utils/trpc"
 
+
+export async function getStaticProps() {
+  const ssg = createProxySSGHelpers({
+    router: appRouter,
+    ctx: await createContextInner({}),
+    transformer: superjson,
+  });
+  await ssg.taunt.list.prefetch();
+  return {
+    props: {
+      trpcState: ssg.dehydrate(),
+    },
+    revalidate: 1,
+  };
+}
 
 const Home: NextPage = () => {
-
-  const phone_input = useRef<HTMLElement|null>(null)
-  useEffect(() => {
-    phone_input.current = document.getElementById("phone")
-    phone_input.current?.addEventListener('input', () => {
-      (phone_input.current as HTMLInputElement).setCustomValidity('');
-      (phone_input.current as HTMLInputElement).checkValidity();
-    });
-  
-    phone_input.current?.addEventListener('invalid', () => {
-      if((phone_input.current as HTMLInputElement).value === '') {
-        (phone_input.current as HTMLInputElement).setCustomValidity('Enter phone number!');
-      } else {
-        (phone_input.current as HTMLInputElement).setCustomValidity('Enter phone number in this format: 123-456-7890');
-      }
-    });
-  }, []) 
+  const tauntsQuery = trpc.taunt.list.useQuery()
+  const { data: taunts } = tauntsQuery
 
   return (
     <>
@@ -46,13 +50,17 @@ const Home: NextPage = () => {
               className="phone no-outline" 
               type="text" 
             />
-            {/* <input className="message no-outline" type="text" /> */}
+            {
+              taunts && taunts.map((taunt, idx) => {
+                const key = `taunt-${idx+1}`
+                return (
+                  <span id={key} key={key} className={`taunt ${key}`} data-id={taunt.id}>{taunt.text}</span>
+                )
+              })
+            }
+            <span className="form-cancel">Cancel</span>
+            <span className="form-submit">Submit</span>
           </form>
-          <span id="taunt-1" className="taunt taunt-1">HaHa!</span>
-          <span id="taunt-2" className="taunt taunt-2">Sorry!</span>
-          <span id="taunt-3" className="taunt taunt-3">Gotcha!</span>
-          <span className="form-cancel">Cancel</span>
-          <span className="form-submit">Submit</span>
         </div>
         <CanvasProvider>
           <GameController />
@@ -63,4 +71,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default Home

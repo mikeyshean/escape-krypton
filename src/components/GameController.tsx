@@ -5,7 +5,6 @@ import $ from "jquery"
 import { useGameSessionContext } from '../context/GameSessionContext'
 import { useCanvasContext } from '../context/CanvasContext'
 import Leaderboard from './Leaderboard'
-// import SubmitLeader from './SubmitLeader'
 
 const THEME_SONG_START_TIME = 46
 const FRAMES_PER_SECOND = 60
@@ -78,7 +77,6 @@ function GameController() {
     if (isValidGameState(canvas, $el, gameSession.id) && !game.current) {
       enableThemeSongLooping()
       game.current = new Game(canvas)
-      resetEndGameMenu()
       showMenu()
     }
   }, [])
@@ -94,6 +92,8 @@ function GameController() {
   
 
   function showMenu(): void {
+    resetEndGameMenu()
+    game.current?.reset()
     const intervalId = setInterval(() => {
       game.current?.drawMenu()
     }, 20)
@@ -158,6 +158,33 @@ function GameController() {
       }
     )
   }
+
+  function showEndGameModal() {
+    showEndGameScores()
+    $restart.current?.show()
+    
+    if (highScore > 0) {
+      $submitScore.current?.show()
+      $submitScore.current?.one("click", (e) => {
+        e.preventDefault()
+  
+        if (scores.current && scores.current[0] && scores.current[0].score < highScore) {
+          resetEndGameMenu()
+          showSubmitScoreForm()
+        } else {
+          submitScore(prompt(`Score: ${highScore}`, "Enter your name"))
+          showMenu()
+        }
+      })
+    }
+
+    bindKeys(undefined, false)
+    $restart.current?.one("click", (e) => {
+      e.preventDefault()
+      startGame()
+    })
+    
+    
   
   function showEndGameScores() {
     canvas.fillStyle = "#2e5280"
@@ -173,7 +200,9 @@ function GameController() {
 
     // restart button
     roundRect(270, 245, 120, 45, 10)
-    roundRect(410, 245, 120, 45, 10)
+    if (highScore > 0) {
+      roundRect(410, 245, 120, 45, 10)
+    }
 
     canvas.fillStyle = "#fff"
     canvas.font = "18px 'Press Start 2P'"
@@ -208,33 +237,7 @@ function GameController() {
     canvas.fillText(String(highScore), xCoord, yHighScorePosition)
   }
 
-  function showEndGameModal() {
-    showEndGameScores()
-    $restart.current?.show()
-    $submitScore.current?.show()
-
-    bindKeys(undefined, false)
-    $restart.current?.one("click", (e) => {
-      e.preventDefault()
-      startGame()
-    })
-    
-    $submitScore.current?.one("click", (e) => {
-      e.preventDefault()
-
-      if (scores.current && scores.current[0] && scores.current[0].score < highScore) {
-        $restart.current?.hide()
-        $submitScore.current?.hide()
-        resetEndGameMenu()
-        showSubmitScoreForm()
-      } else {
-        submitScore(prompt(`Score: ${highScore}`, "Enter your name"))
-        $restart.current?.hide()
-        $submitScore.current?.hide()
-        game.current?.reset()
-        showMenu()
-      }
-    })
+  
 
     
   }
@@ -301,25 +304,25 @@ function GameController() {
   const attachFormEventHandlers = () => {
     $formSubmit.current?.one("click", (e) => {
       e.preventDefault()
-      // console.log("submittng leader details")
-      // submitLeaderDetails()
-      resetEndGameMenu()
-      game.current?.reset()
+      const name = String($nameInput.current?.val())
+      const phoneNumber = stripPhoneNumber(String($phoneInput.current?.val()))
+      const tauntId = $("#score-form").find(".taunt.selected").attr("data-id")
+
+      submitScore(name, phoneNumber, tauntId)
       showMenu()
     })
 
     $formCancel.current?.one("click", (e) => {
       e.preventDefault()
       resetEndGameMenu()
-      game.current?.reset()
       showMenu()
     })
 
     $phoneInput.current?.on('keypress', function(e) {
       e.preventDefault()
+      
       var key = e.key
-      const r = /(\D+)/g
-      let stripped = String($phoneInput.current?.val()).replace(r, '')
+      let stripped = stripPhoneNumber(String($phoneInput.current?.val()))
       
       // Handle Backspace
       if ( key == "Backspace") {
@@ -328,7 +331,7 @@ function GameController() {
         stripped += key
       }
       
-      // Format input
+      // Format and update input val
       const dashed = addDashes(stripped)
       $phoneInput.current?.val(dashed)
     });
@@ -432,9 +435,16 @@ function GameController() {
     return validGame 
   }
 
-  function submitScore(name: string|null) {
+  function submitScore(name: string|null, phoneNumber: string|null = null, tauntId: string|null = null, beatScoreId: string|null = null) {
     if (name) {
-      submitScoreApi.mutate({sessionId: gameSession.id, playerName: name, gameId: bestGameId}, {
+      submitScoreApi.mutate({
+        sessionId: gameSession.id,
+        playerName: name,
+        gameId: bestGameId,
+        tauntId: tauntId,
+        phoneNumber: phoneNumber,
+        beatScoreId: beatScoreId
+      }, {
         onSuccess: () => {
           utils.score.invalidate()
           resetHighScore()
@@ -486,6 +496,7 @@ function GameController() {
 /******//******//******//******//******//******//******//******//******/
 
   function resetEndGameMenu() {
+    unbindKeys()
     $restart.current?.hide()
     $submitScore.current?.hide()
     $submitScore.current?.off("click")
@@ -497,9 +508,10 @@ function GameController() {
     $formCancel.current?.hide()
     $formSubmit.current?.off("click")
     $formCancel.current?.off("click")
-    $taunt1.current?.hide()
-    $taunt2.current?.hide()
-    $taunt3.current?.hide()
+    $phoneInput.current?.off("keypress")
+    $taunt1.current?.hide().removeClass("selected").off("click")
+    $taunt2.current?.hide().removeClass("selected").off("click")
+    $taunt3.current?.hide().removeClass("selected").off("click")
   }
 
   function bindKeys(intervalId: NodeJS.Timer|undefined, withClick: boolean = true) {
@@ -529,6 +541,11 @@ function GameController() {
       })
     }
 
+  }
+
+  function unbindKeys() {
+    $(document).off("keydown")
+    $("#canvas").off("click")
   }
 
   function updateHighScore(score: number) {
@@ -563,6 +580,14 @@ function GameController() {
       rectWidth-cornerRadius,
       rectHeight-cornerRadius
     )
+  }
+
+  /** Use this helper for:
+   * - Removing non numerical values from strings
+   **/
+  function stripPhoneNumber(phoneNumber: string) {
+    const r = /(\D+)/g
+    return phoneNumber.replace(r, '')
   }
 
   return (

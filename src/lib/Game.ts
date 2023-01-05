@@ -244,8 +244,6 @@ class Game {
 
 
   bindKeys() {
-    $(document).off("keydown")
-    $("#canvas").off("click")
     $(document).on("keydown", (e: JQuery.Event) => {
 
       switch (e.which) {

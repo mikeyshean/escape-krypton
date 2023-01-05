@@ -30,12 +30,32 @@ model Game {
 }
 
 model HighScores {
-  id          String   @id @default(cuid())
-  score       Int
-  playerName  String
-  submittedAt DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String      @id @default(cuid())
+  score         Int   
+  playerName    String   
+  phoneNumber   String?   
+  submittedAt   DateTime   
+  SMS           SMS?        @relation("HighScores")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt 
 
-  @@index(fields: [submittedAt(sort: Desc), score(sort: Desc)])
+  @@index(fields: [score(sort: Desc), submittedAt(sort: Asc)])
 }
+
+model Taunt {
+  id            String      @id @default(cuid())
+  text          String   
+  SMS           SMS[]       @relation("Taunt")
+}
+
+model SMS {
+  id            String      @id @default(cuid())
+  phoneNumber   String
+  fields        Json
+  dateSent      DateTime?
+  highScore     HighScores  @relation("HighScores", fields: [highScoreId], references: [id])
+  highScoreId   String      @unique
+  taunt         Taunt       @relation("Taunt", fields: [tauntId], references: [id])
+  tauntId       String
+}
+
