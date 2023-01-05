@@ -11,7 +11,7 @@ function isValidGame(game: {
   stepCount: number
 ): boolean {
   return hasValidStartAndEndTimes(game, gameStartedAt, gameEndedAt) &&
-        hasValidStepCount(game, gameStartedAt, gameEndedAt, stepCount) &&
+        hasValidStepCount(gameStartedAt, gameEndedAt, stepCount) &&
         hasValidScore(game, stepCount)
 }
 
@@ -36,19 +36,12 @@ function hasValidStartAndEndTimes(game: {
   return true
 }
 
-function hasValidStepCount(game: {
-    id: string
-    startedAt: Date
-    endedAt: Date | null
-    sessionId: string
-    score: number | null
-  },
+function hasValidStepCount(
   gameStartedAt: number,
   gameEndedAt: number,
   stepCount: number
 ): boolean {
-  // Try tp validate client game step count based on game duration
-
+  // Try to validate client game step count based on game duration
   const gameDuration = gameEndedAt - gameStartedAt
   const estimatedStepsInGame = gameDuration / (1000/60)
   const stepCountDiff = estimatedStepsInGame / stepCount

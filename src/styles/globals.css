@@ -205,6 +205,11 @@ input {
   font-family: "Press Start 2P";
   color: #fff;
 }
+
+.leaderboard-list span.tied-rank {
+  padding-left: 55px;
+}
+
 .leaderboard-list > li:first-child span:first-child::after {
   content: "";
   background-image: url("../../public/assets/images/superman_shield.png");

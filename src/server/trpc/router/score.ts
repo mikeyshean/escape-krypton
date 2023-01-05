@@ -19,19 +19,45 @@ const defaultGameSelect = Prisma.validator<Prisma.GameSelect>()({
 
 export const scoreRouter = router({
   list: publicProcedure
-    .input(z.undefined())
-    .query(async ({ ctx }) => {
+    .input(z.object({limit: z.number()}))
+    .query(async ({ ctx, input }) => {
+      const take = input.limit
       
+      // Get top 10 distinct scores
+      const top10scores = await ctx.prisma.highScores.findMany({
+        select: defaultScoreSelect,
+        orderBy: {score: 'desc'},
+        take: take,
+        distinct: ['score']
+      })
+      const topScores = top10scores.flatMap((obj) => obj.score)
+      
+      // Get all highscores in the top 10 values (to display duplicates)
       const scores = await ctx.prisma.highScores.findMany({
         select: defaultScoreSelect,
-        take: 10,
+        where: {
+          score: {
+            in: topScores
+          }
+        },
         orderBy: [
           {score: 'desc'},
           {submittedAt: 'asc'}
         ],
       })
-      return scores
+      let current = scores[0]?.score as number
+      let rank = 1
+      const rankedScores = scores.map((score) => {
+        if (current != score.score) {
+          current = score.score
+          rank += 1
+        }
+        return { ...score, rank: rank}
+      })
+
+      return rankedScores
     }),
+
   submit: publicProcedure
     .input(z.object({
       gameId: z.string(),

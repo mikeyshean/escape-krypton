@@ -13,6 +13,7 @@ type Scores = {
   id: string;
   score: number;
   playerName: string;
+  rank: number;
 }[]
 
 
@@ -49,7 +50,7 @@ function GameController() {
   
   const createGameApi = trpc.game.start.useMutation()
   const submitScoreApi = trpc.score.submit.useMutation()
-  trpc.score.list.useQuery(undefined, { 
+  trpc.score.list.useQuery({limit: 10}, { 
     refetchInterval: 7000, 
     refetchIntervalInBackground: false,
     onSuccess: (data) => {
