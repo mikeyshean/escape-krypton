@@ -155,6 +155,8 @@ function GameController() {
         updateHighScore(game.current!.currentScore())
     
         setTimeout(() => {
+          utils.game.count.invalidate()
+          utils.gameSession.count.invalidate()
           showEndGameModal()
         }, 300)
       }
@@ -461,7 +463,7 @@ function GameController() {
         phoneNumber: phoneNumber
       }, {
         onSuccess: () => {
-          utils.score.invalidate()
+          utils.score.top10.invalidate()
           resetHighScore()
         }
       })

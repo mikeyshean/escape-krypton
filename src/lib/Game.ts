@@ -16,13 +16,13 @@ const GREEN_STAR_LIMIT = 2
 const GREEN_PLANET_LIMIT = 2
 class Game {
   superman: Superman
-  gamePieces: (Superman|Kryptonite)[]
-  // Configuratationf for background objects
-  // limit: How man stars allowed on screen at any time
-  // queue: Holds objects
-  // object: Used to instantiate and add correct object into game
-  // interval: How much spacing between objects
-  // minScore: Only shows objects if player's currentScore is >= minScore
+  kryptoniteObjects: Kryptonite[] = []
+  // Configuratation for background objects
+  // - limit: How man stars allowed on screen at any time
+  // - queue: Holds objects
+  // - object: Used to instantiate and add correct object into game
+  // - interval: How much spacing between objects
+  // - minScore: Only shows objects if player's currentScore is >= minScore
   backgroundObjectsConfig = {
     whiteStar: {
       limit: WHITE_STAR_LIMIT,
@@ -74,7 +74,6 @@ class Game {
   constructor(canvas: CanvasRenderingContext2D) {
     this.canvas = canvas
     this.superman = new Superman(this.canvas, this.GRAVITY)
-    this.gamePieces = [this.superman]
   }
 
   draw(): void {
@@ -87,15 +86,17 @@ class Game {
       })
     }
 
-    this.gamePieces.forEach(function (object) {
-      object.draw()
+    this.kryptoniteObjects.forEach(function (kryptonite) {
+      kryptonite.draw()
     })
-    
+
     if (this.gameOver) {
       this.hideScoreCounter()
     } else {
       this.showScoreCounter()
     }
+
+    this.superman.draw()
   }
 
   showScoreCounter() {
@@ -168,10 +169,7 @@ class Game {
   }
 
   checkCollisions() {
-    this.gamePieces.forEach((object) => {
-      if (object instanceof Superman) { return }
-
-      const kryptonite = object as Kryptonite
+    this.kryptoniteObjects.forEach((kryptonite) => {
       if (this.isSideCollision(kryptonite) ||
           this.gapCollision(kryptonite) ||
           this.trigCollision(kryptonite)
@@ -182,10 +180,8 @@ class Game {
   }
 
   updateScore() {
-    this.gamePieces.forEach((object) => {
-      if (object instanceof Superman) { return }
+    this.kryptoniteObjects.forEach((kryptonite) => {
 
-      const kryptonite = object as Kryptonite
       if (this.isScoredKryptonite(kryptonite)) {
         this.kryptoniteScore.add(kryptonite.id)
       }
@@ -274,9 +270,11 @@ class Game {
   }
 
   moveObjects() {
-    this.gamePieces.forEach((object) => {
-      object.step()
+    this.kryptoniteObjects.forEach((kryptonite) => {
+      kryptonite.step()
     })
+
+    this.superman.step()
 
     for (const [_, config] of Object.entries(this.backgroundObjectsConfig)) {
       config.queue.unordered_items().forEach((object) => {
@@ -286,9 +284,10 @@ class Game {
   }
 
   removeKryptonite() {
-    const firstKryptonite = this.gamePieces[1]
+    const firstKryptonite = this.kryptoniteObjects[0]
     if (firstKryptonite?.isOffScreen()) {
-      this.gamePieces.splice(1, 1)
+      console.log("removing kryp")
+      this.kryptoniteObjects.splice(0, 1)
     }
   }
 
@@ -302,7 +301,7 @@ class Game {
 
   tryAddKryptonite() {
     // Adds next kryptonite when current one is halfway through game space
-    const lastKryptonite = this.gamePieces[this.gamePieces.length - 1]
+    const lastKryptonite = this.kryptoniteObjects[this.kryptoniteObjects.length - 1]
     if (lastKryptonite && 
       this.isKryptonite(lastKryptonite) && 
       lastKryptonite.leftEdge() < (this.width / 2)
@@ -340,7 +339,7 @@ class Game {
   }
 
   addKryptonite() {
-    this.gamePieces.push(new Kryptonite(this.nextKryptoniteId, this.canvas, this.height, this.width))
+    this.kryptoniteObjects.push(new Kryptonite(this.nextKryptoniteId, this.canvas, this.height, this.width))
     this.nextKryptoniteId++
   }
 
@@ -351,7 +350,7 @@ class Game {
   reset() {
     this.superman.reset()
     this.bindKeys()
-    this.gamePieces = [this.superman]
+    this.kryptoniteObjects = []
     this.gameOver = false
     this.nextKryptoniteId = 1
     this.kryptoniteScore.clear()
