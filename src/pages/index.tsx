@@ -44,12 +44,24 @@ const Home: NextPage = () => {
           <span className="submit">Submit<br/> Best</span>
           <form id="score-form">
             <input className="name no-outline" type="text" />
+            <div className="tooltip tooltip-phone">
+              <span className="question-icon">?</span>
+              <span className="tooltiptext">
+                <p>- Get notified if anyone passes your rank</p>
+                <p>- If you have multiple positions on the board, you'll only be notified once</p>
+                <p>* Required to enter the leaderboard</p>
+              </span>
+            </div>
             <input 
               id="phone"
               maxLength={16}
               className="phone no-outline" 
               type="text" 
             />
+            <div className="tooltip tooltip-taunt">
+              <span className="question-icon">?</span>
+              <span className="tooltiptext">Send a message to everyone you pass on the leaderboard</span>
+            </div>
             {
               taunts && taunts.map((taunt, idx) => {
                 const key = `taunt-${idx+1}`

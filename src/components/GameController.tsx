@@ -5,6 +5,7 @@ import $ from "jquery"
 import { useGameSessionContext } from '../context/GameSessionContext'
 import { useCanvasContext } from '../context/CanvasContext'
 import Leaderboard from './Leaderboard'
+import { Constants } from '../constants'
 
 const THEME_SONG_START_TIME = 46
 const FRAMES_PER_SECOND = 60
@@ -182,16 +183,16 @@ function GameController() {
     
   
   function showEndGameScores() {
-    canvas.fillStyle = "#2e5280"
-    canvas.strokeStyle = "#2e5280"
+    canvas.fillStyle = Constants.GAME_BLUE
+    canvas.strokeStyle = Constants.GAME_BLUE
     canvas.lineJoin = "round"
     canvas.lineWidth = 10
 
     // outer score box
     roundRect(250, 100, 300, 200, 10)
 
-    canvas.fillStyle = "#B42420"
-    canvas.strokeStyle = "#B42420"
+    canvas.fillStyle = Constants.GAME_RED
+    canvas.strokeStyle = Constants.GAME_RED
 
     // restart button
     
@@ -203,7 +204,7 @@ function GameController() {
       roundRect(340, 245, 120, 45, 10)
     }
 
-    canvas.fillStyle = "#fff"
+    canvas.fillStyle = Constants.GAME_WHITE
     canvas.font = "18px 'Press Start 2P'"
 
     
@@ -264,40 +265,39 @@ function GameController() {
     $taunt2.current?.show()
     $taunt3.current?.show()
 
-    canvas.fillStyle = "#2e5280"
-    canvas.strokeStyle = "#2e5280"
+    canvas.fillStyle = Constants.GAME_BLUE
+    canvas.strokeStyle = Constants.GAME_BLUE
     canvas.lineJoin = "round"
     canvas.lineWidth = 10
 
     // outer score box
-    roundRect(200, 25, 400, 350, 10)
+    roundRect(200, 50, 400, 300, 10)
 
-    canvas.fillStyle = "#B42420"
-    canvas.strokeStyle = "#B42420"
+    canvas.fillStyle = Constants.GAME_RED
+    canvas.strokeStyle = Constants.GAME_RED
 
     // cancel/submit button
-    roundRect(260, 320, 120, 45, 10)
-    roundRect(420, 320, 120, 45, 10)
+    roundRect(260, 280, 120, 45, 10)
+    roundRect(420, 280, 120, 45, 10)
 
-    canvas.fillStyle = "#fff"
-    canvas.font = "18px 'Press Start 2P'"
+    canvas.fillStyle = Constants.GAME_WHITE
+    canvas.font = "14px 'Press Start 2P'"
 
 
     // Name Input
     const ycurrentScorePosition = 165
-    canvas.fillText("Name", 230, 65)
-    roundRect(225, 75, 350, 45, 10)
+    canvas.fillText("Name", 230, 110)
+    roundRect(225, 120, 170, 35, 10)
 
-    // Message
-    // We'll notify you if someone tops your #1 spot
-    canvas.fillText("Phone Number", 230, 155)
-    roundRect(225, 165, 350, 45, 10)
+    // Phone #
+    canvas.fillText("Phone No.", 415, 110)
+    roundRect(410, 120, 170, 35, 10)
 
-    // Send Taunt Nice Try.. Sorry!  Gotcha!
-    canvas.fillText("Select Taunt", 230, 245)
-    roundRect(225, 250, 116, 45, 10)
-    roundRect(341, 250, 116, 45, 10)
-    roundRect(457, 250, 116, 45, 10)
+    // Taunt Buttons
+    canvas.fillText("Choose Taunt", 230, 200)
+    drawTauntBox(1)
+    drawTauntBox(2)
+    drawTauntBox(3)
   }
   
   const attachFormEventHandlers = () => {
@@ -351,34 +351,35 @@ function GameController() {
     })
 
     function toggleTaunts(e: JQuery.TriggeredEvent) {
-      canvas.fillStyle = "#B42420"
+      canvas.fillStyle = Constants.GAME_RED
       const id = e.currentTarget.getAttribute('id')
 
       switch(id) {
+        
         case 'taunt-1':
-          roundRect(225, 250, 116, 45, 10)
+          drawTauntBox(1)
           $taunt1.current?.addClass("selected")
-          canvas.fillStyle = "#fff"
-          roundRect(341, 250, 116, 45, 10)
-          roundRect(457, 250, 116, 45, 10)
+          canvas.fillStyle = Constants.GAME_WHITE
+          drawTauntBox(2)
+          drawTauntBox(3)
           $taunt2.current?.removeClass("selected")
           $taunt3.current?.removeClass("selected")
           break
         case 'taunt-2':
-          roundRect(341, 250, 116, 45, 10)
+          drawTauntBox(2)
           $taunt2.current?.addClass("selected")
-          canvas.fillStyle = "#fff"
-          roundRect(225, 250, 116, 45, 10)
-          roundRect(457, 250, 116, 45, 10)
+          canvas.fillStyle = Constants.GAME_WHITE
+          drawTauntBox(1)
+          drawTauntBox(3)
           $taunt1.current?.removeClass("selected")
           $taunt3.current?.removeClass("selected")
           break
         case 'taunt-3':
-          roundRect(457, 250, 116, 45, 10)
+          drawTauntBox(3)
           $taunt3.current?.addClass("selected")
-          canvas.fillStyle = "#fff"
-          roundRect(225, 250, 116, 45, 10)
-          roundRect(341, 250, 116, 45, 10)
+          canvas.fillStyle = Constants.GAME_WHITE
+          drawTauntBox(1)
+          drawTauntBox(2)
           $taunt1.current?.removeClass("selected")
           $taunt2.current?.removeClass("selected")
           break
@@ -578,6 +579,20 @@ function GameController() {
       rectWidth-cornerRadius,
       rectHeight-cornerRadius
     )
+  }
+
+  function drawTauntBox(id: number) {
+    switch(id) {
+      case 1:
+        roundRect(225, 215, 116, 45, 10)
+        break
+      case 2:
+        roundRect(341, 215, 116, 45, 10)
+        break
+      case 3:
+        roundRect(457, 215, 116, 45, 10)
+        break
+    }
   }
 
   /** Use this helper for:
