@@ -52,12 +52,17 @@ export default class ScoreService {
     const lowerScores = top11.filter((score) => {
       return score.score < this.highScore.score! && score.phoneNumber != this.highScore.phoneNumber
     })
-    
 
+    const higherScores = top11.filter((score) => {
+      return score.score > this.highScore.score! && score.phoneNumber != this.highScore.phoneNumber
+    })
+    
+    
+    const ignoreHigherScorePhoneNumbers = higherScores.map(score => score.phoneNumber)
     const outOfLeaderBoardRank = 11
     const smsRecipients: { [phoneNumber: string]: {phoneNumber: string, fields: RecipientData}} = {}
     lowerScores.forEach((score) => {
-      if (score.phoneNumber == null || score.phoneNumber in smsRecipients) return
+      if (score.phoneNumber == null || score.phoneNumber in smsRecipients || score.phoneNumber in ignoreHigherScorePhoneNumbers) return
       smsRecipients[score.phoneNumber] = {
         phoneNumber: score.phoneNumber,
         fields: {
