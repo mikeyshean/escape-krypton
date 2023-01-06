@@ -82,7 +82,7 @@ export default class ScoreService {
 
     if (Object.keys(smsRecipients).length === 0) return
     
-    await this.saveSms(smsRecipients).then((data) => {
+    await this.saveSms(smsRecipients).then(() => {
       this.sendSms()
     })
   }
@@ -149,7 +149,7 @@ export default class ScoreService {
     const ctx = await createContextInner({})
     const smsCaller = this.smsRouter.createCaller(ctx)
 
-    // return await smsCaller.update({id: id, dateFailed: dateFailed})
+    return await smsCaller.update({id: id, dateFailed: dateFailed})
   }
 
   async getTop11Scorers() {

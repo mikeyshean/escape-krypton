@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import Game from '../lib/Game'
 import { trpc } from "../utils/trpc"
 import $ from "jquery"

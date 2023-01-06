@@ -26,7 +26,7 @@ const defaultGameSelect = Prisma.validator<Prisma.GameSelect>()({
 export const scoreRouter = router({
   top10: publicProcedure
     .input(z.undefined())
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx }) => {
       
       // Get top 10 distinct scores
       const top10scores = await ctx.prisma.highScores.findMany({
@@ -66,7 +66,7 @@ export const scoreRouter = router({
   //  For internal SMS delivery use
   top11: publicProcedure
     .input(z.undefined())
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx }) => {
       
       // Get top 11 distinct scores
       const top11scores = await ctx.prisma.highScores.findMany({
@@ -118,7 +118,7 @@ export const scoreRouter = router({
       const playerPhoneNumber = input.phoneNumber ? "+1"+input.phoneNumber : null
       const tauntId = input.tauntId
       
-      const [highScore, game] = await ctx.prisma.$transaction(async () => {
+      const highScore = await ctx.prisma.$transaction(async () => {
         
         // Verify Game belongs to session
         const game = await ctx.prisma.game.findUnique({
@@ -151,7 +151,7 @@ export const scoreRouter = router({
           select: internalScoreSelect
         })
 
-        return [highScore, game] as const
+        return highScore
       })
 
       if (highScore) {

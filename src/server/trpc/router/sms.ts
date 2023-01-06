@@ -42,10 +42,11 @@ export const smsRouter = router({
       })
     }),
   update: publicProcedure
-    .input(z.object({id: z.string(), dateSent: z.date()}))
+    .input(z.object({id: z.string(), dateSent: z.date().nullable().optional(), dateFailed: z.date().nullable().optional()}))
     .mutation(async ({ctx, input}) => {
       const id = input.id
       const dateSent = input.dateSent
+      const dateFailed = input.dateFailed
 
       return await ctx.prisma.sMS.update({
         where: {
@@ -53,13 +54,14 @@ export const smsRouter = router({
         },
         data: {
           dateSent: dateSent,
+          dateFailed: dateFailed
         },
         select: defaultSmsSelect
       })
     }),
   getPending: publicProcedure
     .input(z.undefined())
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx }) => {
       
       const pendingSms = await ctx.prisma.sMS.findMany({
         select: defaultSmsSelect,
