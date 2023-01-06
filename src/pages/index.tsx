@@ -1,32 +1,30 @@
 import { type NextPage } from "next"
 import Head from "next/head";
-import superjson from 'superjson';
-import { createProxySSGHelpers } from '@trpc/react-query/ssg'
 import GameController from '../components/GameController'
 import { CanvasProvider } from "../context/CanvasContext"
-import { appRouter } from '../server/trpc/router/_app'
-import { createContextInner } from '../server/trpc/context'
 import { trpc } from "../utils/trpc"
+import { useRef } from 'react'
 
-
-// export async function getStaticProps() {
-//   const ssg = createProxySSGHelpers({
-//     router: appRouter,
-//     ctx: await createContextInner({}),
-//     transformer: superjson,
-//   });
-//   await ssg.taunt.list.prefetch();
-//   return {
-//     props: {
-//       trpcState: ssg.dehydrate(),
-//     },
-//     revalidate: 1,
-//   };
-// }
+type Taunts = {
+  id: string;
+  text: string;
+}[]
 
 const Home: NextPage = () => {
-  const tauntsQuery = trpc.taunt.list.useQuery()
-  const { data: taunts } = tauntsQuery
+  const taunts = useRef<Taunts>()
+  trpc.taunt.list.useQuery(undefined, {
+    onSuccess: (data) => {
+      taunts.current = data
+    }
+  })
+
+  if (!taunts.current) {
+    return (
+      <>
+        Loading...
+      </>
+    )
+  }
 
   return (
     <>
@@ -63,7 +61,7 @@ const Home: NextPage = () => {
               <span className="tooltiptext">Send a message to everyone you pass on the leaderboard</span>
             </div>
             {
-              taunts && taunts.map((taunt, idx) => {
+              taunts.current?.map((taunt, idx) => {
                 const key = `taunt-${idx+1}`
                 return (
                   <span id={key} key={key} className={`taunt ${key}`} data-id={taunt.id}>{taunt.text}</span>
