@@ -112,13 +112,13 @@ export default class ScoreService {
       
       switch (messageId) {
         case this.downrankedMessageId:
-          message = `Krypton Alert: Hey, ${beatenPlayer}! ${playerName} just made it onto the leaderboard and knocked you down to ${newRank} place! ${tauntMsg}`
+          message = `🪐Krypton Alert🪐\nHey, ${beatenPlayer}! ${playerName} just made it onto the leaderboard and knocked you down to ${newRank} place! ${tauntMsg}`
           break
         case this.newLeaderMessageId:
-          message = `Krypton Alert: Hey, ${beatenPlayer}! Your TOP Score of ${beatenScore}, was just beaten by ${playerName} who scored ${newHighScore}! ${tauntMsg}`
+          message = `🪐Krypton Alert🪐\nHey, ${beatenPlayer}! Your TOP Score of ${beatenScore}, was just beaten by ${playerName} who scored ${newHighScore}! ${tauntMsg}`
           break
         case this.knockedOutMessageId:
-          message = `Krypton Alert: Hey, ${beatenPlayer}! ${playerName} just knocked you off the leaderboard with a score of ${newHighScore}! ${tauntMsg}`
+          message = `🪐Krypton Alert🪐\nHey, ${beatenPlayer}! ${playerName} just knocked you off the leaderboard with a score of ${newHighScore}! ${tauntMsg}`
           break
       }
 

@@ -47,12 +47,12 @@ network:
 #    count: 2               # Number of tasks to run for the "test" environment.
 #    deployment:            # The deployment strategy for the "test" environment.
 #       rolling: 'recreate' # Stops existing tasks before new ones are started for faster deployments.
+# secretsmanager: 'kryptonclusterAuroraSecret-TYtMekn1joIE:url::'
 environments:
     production:
       secrets:
         DATABASE_URL:
           secretsmanager: 'krypton-free-rds:url::'
-          # secretsmanager: 'kryptonclusterAuroraSecret-TYtMekn1joIE:url::'
         TWILIO_ACCOUNT_SID:
           secretsmanager: 'krypton-prod-twilio:account_sid::'
         TWILIO_AUTH_TOKEN:
