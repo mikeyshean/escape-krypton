@@ -286,7 +286,6 @@ class Game {
   removeKryptonite() {
     const firstKryptonite = this.kryptoniteObjects[0]
     if (firstKryptonite?.isOffScreen()) {
-      console.log("removing kryp")
       this.kryptoniteObjects.splice(0, 1)
     }
   }
