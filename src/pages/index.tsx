@@ -9,20 +9,20 @@ import { createContextInner } from '../server/trpc/context'
 import { trpc } from "../utils/trpc"
 
 
-export async function getStaticProps() {
-  const ssg = createProxySSGHelpers({
-    router: appRouter,
-    ctx: await createContextInner({}),
-    transformer: superjson,
-  });
-  await ssg.taunt.list.prefetch();
-  return {
-    props: {
-      trpcState: ssg.dehydrate(),
-    },
-    revalidate: 1,
-  };
-}
+// export async function getStaticProps() {
+//   const ssg = createProxySSGHelpers({
+//     router: appRouter,
+//     ctx: await createContextInner({}),
+//     transformer: superjson,
+//   });
+//   await ssg.taunt.list.prefetch();
+//   return {
+//     props: {
+//       trpcState: ssg.dehydrate(),
+//     },
+//     revalidate: 1,
+//   };
+// }
 
 const Home: NextPage = () => {
   const tauntsQuery = trpc.taunt.list.useQuery()
