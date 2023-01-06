@@ -65,7 +65,6 @@ class Game {
   goingUp = true
   paused = false
   gameOver = false
-  GRAVITY = .2
   nextKryptoniteId = 1
   kryptoniteScore = new Set<number>()
   stepCount = 0
@@ -73,7 +72,7 @@ class Game {
   canvas: CanvasRenderingContext2D
   constructor(canvas: CanvasRenderingContext2D) {
     this.canvas = canvas
-    this.superman = new Superman(this.canvas, this.GRAVITY)
+    this.superman = new Superman(this.canvas)
   }
 
   draw(): void {
@@ -318,7 +317,7 @@ class Game {
       const limit = config.limit
       const interval = config.interval
       if (this.currentScore() >= config.minScore && config.queue.size() < limit && this.stepCount % interval == 0) {
-        config.queue.add(new config.object(this.canvas, this.height, this.width))
+        config.queue.add(new config.object(this.canvas))
       }
     }
   }
@@ -350,7 +349,7 @@ class Game {
   }
 
   addKryptonite() {
-    this.kryptoniteObjects.push(new Kryptonite(this.nextKryptoniteId, this.canvas, this.height, this.width))
+    this.kryptoniteObjects.push(new Kryptonite(this.nextKryptoniteId, this.canvas))
     this.nextKryptoniteId++
   }
 

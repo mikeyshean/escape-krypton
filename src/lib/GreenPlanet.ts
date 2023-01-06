@@ -11,9 +11,9 @@ class GreenPlanet implements GameObject {
   image = new Image()
   canvas: CanvasRenderingContext2D
 
-  constructor(canvas: CanvasRenderingContext2D, game_height: number, game_width: number) {
-    this.xPosition = game_width
-    this.yPosition = Math.random() * game_height
+  constructor(canvas: CanvasRenderingContext2D) {
+    this.xPosition = Constants.GAME_WIDTH
+    this.yPosition = Math.random() * Constants.GAME_HEIGHT
     this.image.src = '../assets/images/green_planet.png'
     this.canvas = canvas
   }

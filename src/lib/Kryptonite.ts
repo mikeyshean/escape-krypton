@@ -24,20 +24,20 @@ class Kryptonite {
   canvas: CanvasRenderingContext2D
   id: number
 
-  constructor(id: number, canvas: CanvasRenderingContext2D, game_height: number, game_width: number) {
+  constructor(id: number, canvas: CanvasRenderingContext2D) {
     this.id = id
     // game_height and game_width are used as inital reference points to know where to start 
     // our first stroke onto the canvas to enter the game.  Allows for potentially exploring
     // different canvas sizes
 
     // Top kryptonite's position on the canvas
-    this.xTopPosition = game_width
+    this.xTopPosition = Constants.GAME_WIDTH
     this.yTopPosition = 0
 
     // Bottoms kryptonite's position on the canvas + height
-    this.xBottomPosition = game_width
+    this.xBottomPosition = Constants.GAME_WIDTH
     this.yBottomPosition = this.topKryptoniteHeight + GAP_BETWEEN_KRYPTONITE
-    this.bottomKryptoniteHeight =  game_height - this.topKryptoniteHeight - GAP_BETWEEN_KRYPTONITE
+    this.bottomKryptoniteHeight =  Constants.GAME_HEIGHT - this.topKryptoniteHeight - GAP_BETWEEN_KRYPTONITE
 
     this.image.src = '../assets/images/kryptonite.png'
     this.canvas = canvas

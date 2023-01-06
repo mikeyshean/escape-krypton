@@ -1,3 +1,5 @@
+import { Constants } from '../constants'
+
 const DIM = 33
 const MAX_VEL = -5.5
 const START_POS_X = 400
@@ -20,11 +22,11 @@ class Superman {
   ctx: CanvasRenderingContext2D
   gravity: number
 
-  constructor(ctx: CanvasRenderingContext2D, gravity: number) {
+  constructor(ctx: CanvasRenderingContext2D) {
     this.image.src = 'assets/images/chubby-superman.png'
     this.flySound.src = 'assets/soundfx/fly.m4a'
     this.ctx = ctx
-    this.gravity = gravity
+    this.gravity = Constants.GAME_GRAVITY
   }
 
 

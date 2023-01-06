@@ -11,9 +11,9 @@ class WhiteStar implements GameObject {
   image = new Image()
   canvas: CanvasRenderingContext2D
 
-  constructor(canvas: CanvasRenderingContext2D, game_height: number, game_width: number) {
-    this.xPosition = game_width // Starts from far right of screen
-    this.yPosition = Math.random() * game_height
+  constructor(canvas: CanvasRenderingContext2D) {
+    this.xPosition = Constants.GAME_WIDTH // Starts from far right of screen
+    this.yPosition = Math.random() * Constants.GAME_HEIGHT
     this.image.src = '../assets/images/white_star.png'
     this.canvas = canvas
   }
