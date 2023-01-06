@@ -85,8 +85,8 @@ const Home: NextPage = () => {
           </form>
         </div>
         <div className="counter-container">
-          <div className="counter visitor">Visitors: {visitorCount}</div>
-          <div className="counter games">Games Played: {gameCount}</div>
+          <div className="counter visitor">Visitors: {visitorCount?.toLocaleString("en-US")}</div>
+          <div className="counter games">Games Played: {gameCount?.toLocaleString("en-US")}</div>
         </div>
         <CanvasProvider>
           <GameController />
