@@ -95,10 +95,15 @@ export const gameRouter = router({
 
         return validatedGame
       })
-
+    }),
+  count: publicProcedure
+    .input(z.undefined())
+    .query(async ({ ctx }) => {
+      const count = await ctx.prisma.game.aggregate({
+        _count: {
+          id: true
+        }
+      })
+      return count._count.id
     })
-
-    
-
-  
 });

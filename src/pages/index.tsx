@@ -3,7 +3,7 @@ import Head from "next/head";
 import GameController from '../components/GameController'
 import { CanvasProvider } from "../context/CanvasContext"
 import { trpc } from "../utils/trpc"
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 
 type Taunts = {
   id: string;
@@ -12,9 +12,21 @@ type Taunts = {
 
 const Home: NextPage = () => {
   const taunts = useRef<Taunts>()
+  const [visitorCount, setVisitorCount] = useState<number>()
+  const [gameCount, setGameCount] = useState<number>()
   trpc.taunt.list.useQuery(undefined, {
     onSuccess: (data) => {
       taunts.current = data
+    }
+  })
+  trpc.gameSession.count.useQuery(undefined, {
+    onSuccess: (data) => {
+      setVisitorCount(data)
+    }
+  })
+  trpc.game.count.useQuery(undefined, {
+    onSuccess: (data) => {
+      setGameCount(data)
     }
   })
 
@@ -71,6 +83,10 @@ const Home: NextPage = () => {
             <span className="form-cancel">Cancel</span>
             <span className="form-submit">Submit</span>
           </form>
+        </div>
+        <div className="counter-container">
+          <div className="counter visitor">Visitors: {visitorCount}</div>
+          <div className="counter games">Games Played: {gameCount}</div>
         </div>
         <CanvasProvider>
           <GameController />

@@ -40,5 +40,15 @@ export const gameSessionRouter = router({
       } else {
         return null
       }
+    }),
+  count: publicProcedure
+    .input(z.undefined())
+    .query(async ({ ctx }) => {
+      const count = await ctx.prisma.gameSession.aggregate({
+        _count: {
+          id: true
+        }
+      })
+      return count._count.id
     })
 });
