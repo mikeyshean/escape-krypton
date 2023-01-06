@@ -80,11 +80,7 @@ class Game {
     // Main drawing of entire game state for each step
     this.canvas.clearRect(0, 0, 800, 400)
     
-    for (const [_, config] of Object.entries(this.backgroundObjectsConfig)) {
-      config.queue.unordered_items().forEach((object) => {
-        object.draw()
-      })
-    }
+    this.drawBackgroundObjects()
 
     this.kryptoniteObjects.forEach(function (kryptonite) {
       kryptonite.draw()
@@ -113,6 +109,7 @@ class Game {
     const canvas = this.canvas
     canvas.clearRect(0, 0, 800, 400)
     this.floatSuperman()
+    
 
     canvas.fillStyle = "#2AE249"
     canvas.strokeStyle = "#00CC00"
@@ -134,7 +131,12 @@ class Game {
     canvas.strokeStyle = "#00CC00"
     canvas.fillText("Kryptonite!", 421, 355)
     canvas.strokeText("Kryptonite!", 421, 355)
+    this.removeBackgroundObjects()
+    this.tryAddBackgroundObjects()
+    this.moveBackgroundObjects()
+    this.drawBackgroundObjects()
     this.superman.draw()
+    this.stepCount++
   }
 
   step() {
@@ -273,9 +275,11 @@ class Game {
     this.kryptoniteObjects.forEach((kryptonite) => {
       kryptonite.step()
     })
-
     this.superman.step()
+    this.moveBackgroundObjects()
+  }
 
+  moveBackgroundObjects() {
     for (const [_, config] of Object.entries(this.backgroundObjectsConfig)) {
       config.queue.unordered_items().forEach((object) => {
         object.step()
@@ -316,6 +320,14 @@ class Game {
       if (this.currentScore() >= config.minScore && config.queue.size() < limit && this.stepCount % interval == 0) {
         config.queue.add(new config.object(this.canvas, this.height, this.width))
       }
+    }
+  }
+
+  drawBackgroundObjects() {
+    for (const [_, config] of Object.entries(this.backgroundObjectsConfig)) {
+      config.queue.unordered_items().forEach((object) => {
+        object.draw()
+      })
     }
   }
 
