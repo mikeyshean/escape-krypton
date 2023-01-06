@@ -1,5 +1,5 @@
 
-import GameObject from './GameObject'
+import type GameObject from './GameObject'
 import { Constants } from '../constants'
 
 const WIDTH = 25

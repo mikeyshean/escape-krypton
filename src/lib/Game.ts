@@ -323,7 +323,6 @@ class Game {
 
   removeBackgroundObjects() {
     for (const [_, config] of Object.entries(this.backgroundObjectsConfig)) {
-      const limit = config.limit
       let first = config.queue.peek()
       while (first) {
         if (first.isOffScreen()) {
