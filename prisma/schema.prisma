@@ -35,7 +35,6 @@ model HighScores {
   playerName    String   
   phoneNumber   String?   
   submittedAt   DateTime   
-  SMS           SMS?        @relation("HighScores")
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt 
 
@@ -45,7 +44,6 @@ model HighScores {
 model Taunt {
   id            String      @id @default(cuid())
   text          String   
-  SMS           SMS[]       @relation("Taunt")
 }
 
 model SMS {
@@ -53,9 +51,6 @@ model SMS {
   phoneNumber   String
   fields        Json
   dateSent      DateTime?
-  highScore     HighScores  @relation("HighScores", fields: [highScoreId], references: [id])
-  highScoreId   String      @unique
-  taunt         Taunt       @relation("Taunt", fields: [tauntId], references: [id])
-  tauntId       String
+  dateFailed    DateTime?
 }
 

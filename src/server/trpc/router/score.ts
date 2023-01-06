@@ -2,13 +2,19 @@ import { z } from "zod";
 import { Prisma } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { router, publicProcedure } from "../trpc";
-import { smsRouter } from './sms'
 import ScoreService from "../../score_service";
 
 const defaultScoreSelect = Prisma.validator<Prisma.HighScoresSelect>()({
   id: true,
   score: true,
   playerName: true
+});
+
+const internalScoreSelect = Prisma.validator<Prisma.HighScoresSelect>()({
+  id: true,
+  score: true,
+  playerName: true,
+  phoneNumber: true
 });
 
 const defaultGameSelect = Prisma.validator<Prisma.GameSelect>()({
@@ -18,16 +24,15 @@ const defaultGameSelect = Prisma.validator<Prisma.GameSelect>()({
 });
 
 export const scoreRouter = router({
-  list: publicProcedure
-    .input(z.object({limit: z.number()}))
+  top10: publicProcedure
+    .input(z.undefined())
     .query(async ({ ctx, input }) => {
-      const take = input.limit
       
       // Get top 10 distinct scores
       const top10scores = await ctx.prisma.highScores.findMany({
         select: defaultScoreSelect,
         orderBy: {score: 'desc'},
-        take: take,
+        take: 10,
         distinct: ['score']
       })
       const topScores = top10scores.flatMap((obj) => obj.score)
@@ -58,6 +63,46 @@ export const scoreRouter = router({
       return rankedScores
     }),
 
+  //  For internal SMS delivery use
+  top11: publicProcedure
+    .input(z.undefined())
+    .query(async ({ ctx, input }) => {
+      
+      // Get top 11 distinct scores
+      const top11scores = await ctx.prisma.highScores.findMany({
+        select: internalScoreSelect,
+        orderBy: {score: 'desc'},
+        take: 11,
+        distinct: ['score']
+      })
+      const topScores = top11scores.flatMap((obj) => obj.score)
+      
+      // Get all highscores in the top 11 values with phoneNumbers
+      const scores = await ctx.prisma.highScores.findMany({
+        select: internalScoreSelect,
+        where: {
+          score: {
+            in: topScores
+          }
+        },
+        orderBy: [
+          {score: 'desc'},
+          {submittedAt: 'asc'}
+        ],
+      })
+      let current = scores[0]?.score as number
+      let rank = 1
+      const rankedScores = scores.map((score) => {
+        if (current != score.score) {
+          current = score.score
+          rank += 1
+        }
+        return { ...score, rank: rank}
+      })
+
+      return rankedScores
+    }),
+
   submit: publicProcedure
     .input(z.object({
       gameId: z.string(),
@@ -65,13 +110,12 @@ export const scoreRouter = router({
       playerName: z.string(),
       phoneNumber: z.string().nullable(),
       tauntId: z.string().nullable(),
-      beatScoreId: z.string().nullable()
     }))
     .mutation(async ({ctx, input}) => {
       const gameId = input.gameId
       const sessionId = input.sessionId
       const playerName = input.playerName
-      const phoneNumber = input.phoneNumber
+      const playerPhoneNumber = input.phoneNumber
       const tauntId = input.tauntId
       
       const [highScore, game] = await ctx.prisma.$transaction(async () => {
@@ -100,21 +144,22 @@ export const scoreRouter = router({
         const highScore = await ctx.prisma.highScores.create({
           data: {
             score: game.score!,
-            phoneNumber: phoneNumber,
+            phoneNumber: playerPhoneNumber,
             playerName: playerName,
             submittedAt: new Date(),
           },
-          select: defaultScoreSelect
+          select: internalScoreSelect
         })
 
         return [highScore, game] as const
       })
 
-      // TODO: Calculate SMS notifcations
-      if (game) {
-        const service = new ScoreService(game)
-        service.createSmsRecipients()
+      if (highScore) {
+        const service = new ScoreService(highScore)
+        service.sendSmsNotifications(tauntId)
       }
-      return highScore
+      const { phoneNumber, ...scoreWithoutPhone } = highScore
+      
+      return scoreWithoutPhone
     }),
 })

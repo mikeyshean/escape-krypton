@@ -50,7 +50,7 @@ function GameController() {
   
   const createGameApi = trpc.game.start.useMutation()
   const submitScoreApi = trpc.score.submit.useMutation()
-  trpc.score.list.useQuery({limit: 10}, { 
+  trpc.score.top10.useQuery(undefined, { 
     refetchInterval: 7000, 
     refetchIntervalInBackground: false,
     onSuccess: (data) => {
@@ -436,15 +436,14 @@ function GameController() {
     return validGame 
   }
 
-  function submitScore(name: string|null, phoneNumber: string|null = null, tauntId: string|null = null, beatScoreId: string|null = null) {
+  function submitScore(name: string|null, phoneNumber: string|null = null, tauntId: string|null = null) {
     if (name) {
       submitScoreApi.mutate({
         sessionId: gameSession.id,
         playerName: name,
         gameId: bestGameId,
         tauntId: tauntId,
-        phoneNumber: phoneNumber,
-        beatScoreId: beatScoreId
+        phoneNumber: phoneNumber
       }, {
         onSuccess: () => {
           utils.score.invalidate()

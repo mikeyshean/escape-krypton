@@ -140,7 +140,7 @@ class Game {
     this.moveObjects()
     this.removeKryptonite()
     this.removeBackgroundObjects()
-    this.checkCollisions()
+    // this.checkCollisions()
     this.checkGameOver()
     this.tryAddKryptonite()
     this.tryAddBackgroundObjects()

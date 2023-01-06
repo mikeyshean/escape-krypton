@@ -8,6 +8,7 @@ async function main() {
     },
     update: {},
     create: {
+      id: 'clcjkdooh000008mde8pb8mbx',
       text: 'HaHa!',
     }
   })
@@ -17,6 +18,7 @@ async function main() {
     },
     update: {},
     create: {
+      id: 'clcjkex29000108md0ir68c5b',
       text: 'Sorry!',
     }
   })
@@ -26,6 +28,7 @@ async function main() {
     },
     update: {},
     create: {
+      id: 'clcjkf0e8000208mdh49d05h0',
       text: 'Gotcha!',
     }
   })

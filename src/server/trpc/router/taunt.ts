@@ -18,4 +18,17 @@ export const tauntRouter = router({
       })
       return taunts
     }),
+  get: publicProcedure
+    .input(z.object({id: z.string()}))
+    .query(async ({ ctx, input}) => {
+      const id = input.id
+
+      const taunt = await ctx.prisma.taunt.findUnique({
+        where: {
+          id: id
+        },
+        select: defaultTauntSelect,
+      })
+      return taunt
+    }),
 })

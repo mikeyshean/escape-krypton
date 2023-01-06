@@ -1,4 +1,4 @@
-import { type NextPage, GetStaticPropsContext } from "next"
+import { type NextPage } from "next"
 import Head from "next/head";
 import superjson from 'superjson';
 import { createProxySSGHelpers } from '@trpc/react-query/ssg'
