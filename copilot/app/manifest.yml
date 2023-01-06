@@ -54,6 +54,6 @@ environments:
         DATABASE_URL:
           secretsmanager: 'krypton-free-rds:url::'
         TWILIO_ACCOUNT_SID:
-          secretsmanager: 'krypton-prod-twilio:account_sid::'
+          secretsmanager: 'krypton-prod-twilio:account-sid::'
         TWILIO_AUTH_TOKEN:
-          secretsmanager: 'krypton-prod-twilio:auth_token::'
+          secretsmanager: 'krypton-prod-twilio:auth-token::'
