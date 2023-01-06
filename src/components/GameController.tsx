@@ -300,15 +300,7 @@ function GameController() {
   }
   
   const attachFormEventHandlers = () => {
-    $formSubmit.current?.one("click", (e) => {
-      e.preventDefault()
-      const name = String($nameInput.current?.val())
-      const phoneNumber = stripPhoneNumber(String($phoneInput.current?.val()))
-      const tauntId = $("#score-form").find(".taunt.selected").attr("data-id")
-
-      submitScore(name, phoneNumber, tauntId)
-      showMenu()
-    })
+    $formSubmit.current?.one("click", submitHandler)
 
     $formCancel.current?.one("click", (e) => {
       e.preventDefault()
@@ -327,6 +319,7 @@ function GameController() {
         stripped = stripped.substring(0, stripped.length - 1)
       } else {
         stripped += key
+        stripped = stripPhoneNumber(stripped)
       }
       
       // Format and update input val
@@ -382,6 +375,30 @@ function GameController() {
           $taunt1.current?.removeClass("selected")
           $taunt2.current?.removeClass("selected")
           break
+      }
+    }
+
+    function submitHandler(e: JQuery.TriggeredEvent) {
+      e.preventDefault()
+      const name = String($nameInput.current?.val())
+      const phoneNumber = stripPhoneNumber(String($phoneInput.current?.val()))
+      const tauntId = $("#score-form").find(".taunt.selected").attr("data-id")
+      const requiredFieldAlerts = []
+      if (!name) {
+       requiredFieldAlerts.push("* Name is required")
+      }
+      if (phoneNumber.length != 10) {
+       requiredFieldAlerts.push("* Phone number is required")
+      }
+      if (!tauntId) {
+       requiredFieldAlerts.push("* Come on, taunting is fun! Pick one!")
+      }
+      if (requiredFieldAlerts.length > 0) {
+        alert(requiredFieldAlerts.join("\n"))
+        $formSubmit.current?.one("click", submitHandler)
+      } else {
+        submitScore(name, phoneNumber, tauntId)
+        showMenu()
       }
     }
 
@@ -598,8 +615,8 @@ function GameController() {
    * - Removing non numerical values from strings
    **/
   function stripPhoneNumber(phoneNumber: string) {
-    const r = /(\D+)/g
-    return phoneNumber.replace(r, '')
+    const regEx = /(\D+)/g
+    return phoneNumber.replace(regEx, '')
   }
 
   return (
