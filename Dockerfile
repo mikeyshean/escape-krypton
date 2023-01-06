@@ -23,6 +23,8 @@ RUN \
 
 FROM --platform=linux/amd64 node:16-alpine3.16 AS builder
 ARG DATABASE_URL
+ARG TWILIO_ACCOUNT_SID
+ARG TWILIO_AUTH_TOKEN
 ARG NEXT_PUBLIC_CLIENTVAR
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
