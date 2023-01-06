@@ -285,7 +285,6 @@ function GameController() {
 
 
     // Name Input
-    const ycurrentScorePosition = 165
     canvas.fillText("Name", 230, 110)
     roundRect(225, 120, 170, 35, 10)
 
@@ -320,7 +319,7 @@ function GameController() {
     $phoneInput.current?.on('keypress', function(e) {
       e.preventDefault()
       
-      var key = e.key
+      const key = e.key
       let stripped = stripPhoneNumber(String($phoneInput.current?.val()))
       
       // Handle Backspace
@@ -513,7 +512,7 @@ function GameController() {
     $taunt3.current?.hide().removeClass("selected").off("click")
   }
 
-  function bindKeys(intervalId: NodeJS.Timer|undefined, withClick: boolean = true) {
+  function bindKeys(intervalId: NodeJS.Timer|undefined, withClick = true) {
     $(document).on("keydown", (e: JQuery.Event) => {
       switch (e.which) {
         case 38:

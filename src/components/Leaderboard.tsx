@@ -17,7 +17,7 @@ function ScoreBoard({ scores }: { scores: { id: string; playerName: string; scor
               currentRank = score.rank
               displayRank = `${score.rank}.`
             }
-            let classes: string[] = []
+            const classes: string[] = []
             if (!showRank) classes.push("tied-rank")
             if (showRank && score.rank < 10) classes.push("padding")
 
