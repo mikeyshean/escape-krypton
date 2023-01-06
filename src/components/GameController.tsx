@@ -168,14 +168,8 @@ function GameController() {
       $submitScore.current?.show()
       $submitScore.current?.one("click", (e) => {
         e.preventDefault()
-  
-        if (scores.current && scores.current[0] && scores.current[0].score < highScore) {
-          resetEndGameMenu()
-          showSubmitScoreForm()
-        } else {
-          submitScore(prompt(`Score: ${highScore}`, "Enter your name"))
-          showMenu()
-        }
+        resetEndGameMenu()
+        showSubmitScoreForm()
       })
     }
 
@@ -200,9 +194,13 @@ function GameController() {
     canvas.strokeStyle = "#B42420"
 
     // restart button
-    roundRect(270, 245, 120, 45, 10)
+    
     if (highScore > 0) {
       roundRect(410, 245, 120, 45, 10)
+      roundRect(270, 245, 120, 45, 10)
+    } else {
+      $restart.current?.addClass("center")
+      roundRect(340, 245, 120, 45, 10)
     }
 
     canvas.fillStyle = "#fff"
@@ -497,7 +495,7 @@ function GameController() {
 
   function resetEndGameMenu() {
     unbindKeys()
-    $restart.current?.hide()
+    $restart.current?.hide().removeClass("center")
     $submitScore.current?.hide()
     $submitScore.current?.off("click")
     $restart.current?.off("click")

@@ -115,7 +115,7 @@ export const scoreRouter = router({
       const gameId = input.gameId
       const sessionId = input.sessionId
       const playerName = input.playerName
-      const playerPhoneNumber = input.phoneNumber
+      const playerPhoneNumber = input.phoneNumber ? "+1"+input.phoneNumber : null
       const tauntId = input.tauntId
       
       const [highScore, game] = await ctx.prisma.$transaction(async () => {
