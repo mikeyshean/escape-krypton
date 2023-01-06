@@ -15,28 +15,27 @@ type RecipientData = {
   messageId: number
 }
 
+const NEW_LEADER_MESSAGE_ID = 1
+const DOWN_RANKED_MESSAGE_ID = 2
+const KNOCKED_OUT_MESSAGE_ID = 3
+const ORDINAL_SUFFIX:{[key:number]: string} = {
+  1: "st",
+  2: "nd",
+  3: "rd",
+  4: "th",
+  5: "th",
+  6: "th",
+  7: "th",
+  8: "th",
+  9: "th",
+  10: "th"
+}
+
 export default class ScoreService {
   private highScore
   private scoreRouter = scoreRouter
   private tauntRouter = tauntRouter
   private smsRouter = smsRouter
-
-  private newLeaderMessageId = 1
-  private downrankedMessageId = 2
-  private knockedOutMessageId = 3
-
-  private ORDINAL_SUFFIX:{[key:number]: string} = {
-    1: "st",
-    2: "nd",
-    3: "rd",
-    4: "th",
-    5: "th",
-    6: "th",
-    7: "th",
-    8: "th",
-    9: "th",
-    10: "th"
-  }
 
   constructor(highScore: { id: string, score: number, playerName: string, phoneNumber: string|null}) {
     this.highScore = highScore
@@ -57,18 +56,21 @@ export default class ScoreService {
       return score.score > this.highScore.score! && score.phoneNumber != this.highScore.phoneNumber
     })
     
-    
     const ignoreHigherScorePhoneNumbers = higherScores.map(score => score.phoneNumber)
     const outOfLeaderBoardRank = 11
     const smsRecipients: { [phoneNumber: string]: {phoneNumber: string, fields: RecipientData}} = {}
+    
     lowerScores.forEach((score) => {
-      if (score.phoneNumber == null || score.phoneNumber in smsRecipients || score.phoneNumber in ignoreHigherScorePhoneNumbers) return
+      if (score.phoneNumber == null || 
+          score.phoneNumber in smsRecipients || 
+          score.phoneNumber in ignoreHigherScorePhoneNumbers) return
+      
       smsRecipients[score.phoneNumber] = {
         phoneNumber: score.phoneNumber,
         fields: {
           taunt: taunt?.text || "",
           playerName: this.highScore.playerName,
-          newRank: `${score.rank}${this.ORDINAL_SUFFIX[score.rank]}`,
+          newRank: `${score.rank}${ORDINAL_SUFFIX[score.rank]}`,
           newHighScore: this.highScore.score,
           beatenScore: score.score,
           beatenPlayer: score.playerName,
@@ -77,11 +79,11 @@ export default class ScoreService {
       }
 
       if (score.rank == 2) {
-        smsRecipients[score.phoneNumber]!.fields!['messageId'] = this.newLeaderMessageId
+        smsRecipients[score.phoneNumber]!.fields!['messageId'] = NEW_LEADER_MESSAGE_ID
       } else if (score.rank == outOfLeaderBoardRank) {
-        smsRecipients[score.phoneNumber]!.fields!['messageId'] = this.knockedOutMessageId
+        smsRecipients[score.phoneNumber]!.fields!['messageId'] = KNOCKED_OUT_MESSAGE_ID
       } else {
-        smsRecipients[score.phoneNumber]!.fields!['messageId'] = this.downrankedMessageId
+        smsRecipients[score.phoneNumber]!.fields!['messageId'] = DOWN_RANKED_MESSAGE_ID
       }
     })
 
@@ -116,13 +118,13 @@ export default class ScoreService {
       let message = ''
       
       switch (messageId) {
-        case this.downrankedMessageId:
+        case DOWN_RANKED_MESSAGE_ID:
           message = `🪐Krypton Alert🪐\nHey, ${beatenPlayer}! ${playerName} just made it onto the leaderboard and knocked you down to ${newRank} place! ${tauntMsg}`
           break
-        case this.newLeaderMessageId:
+        case NEW_LEADER_MESSAGE_ID:
           message = `🪐Krypton Alert🪐\nHey, ${beatenPlayer}! Your TOP Score of ${beatenScore}, was just beaten by ${playerName} who scored ${newHighScore}! ${tauntMsg}`
           break
-        case this.knockedOutMessageId:
+        case KNOCKED_OUT_MESSAGE_ID:
           message = `🪐Krypton Alert🪐\nHey, ${beatenPlayer}! ${playerName} just knocked you off the leaderboard with a score of ${newHighScore}! ${tauntMsg}`
           break
       }
@@ -171,5 +173,4 @@ export default class ScoreService {
 
     return await tauntCaller.get({id: id})
   }
-  
 }
