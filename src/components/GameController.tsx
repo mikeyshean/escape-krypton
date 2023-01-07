@@ -400,12 +400,13 @@ function GameController() {
       if (!name) {
        requiredFieldAlerts.push("* Name is required")
       }
-      if (phoneNumber.length != 10) {
-       requiredFieldAlerts.push("* Phone number is required")
-      }
-      if (!tauntId) {
-       requiredFieldAlerts.push("* Come on, taunting is fun! Pick one!")
-      }
+      // Switching to optional fields
+      // if (phoneNumber.length != 10) {
+      //  requiredFieldAlerts.push("* Phone number is required")
+      // }
+      // if (!tauntId) {
+      //  requiredFieldAlerts.push("* Come on, taunting is fun! Pick one!")
+      // }
       if (requiredFieldAlerts.length > 0) {
         alert(requiredFieldAlerts.join("\n"))
         $formSubmit.current?.one("click", submitHandler)

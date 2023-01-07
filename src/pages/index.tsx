@@ -58,8 +58,8 @@ const Home: NextPage = () => {
               <span className="question-icon">?</span>
               <span className="tooltiptext">
                 <p>- Get notified if anyone passes your rank</p>
-                <p>- If you have multiple positions on the board, you&apos;ll only be notified once</p>
-                <p>* Required to enter the leaderboard</p>
+                <p>- If you have multiple positions on the board, you&apos;ll only be notified for your highest score</p>
+                <p>(Optional)</p>
               </span>
             </div>
             <input 
