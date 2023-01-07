@@ -48,22 +48,26 @@ export default class ScoreService {
     const top11 = await this.getTop11Scorers()
     const taunt = await this.getTaunt(tauntId)
 
+    // Potential SMS recipients
     const lowerScores = top11.filter((score) => {
       return score.score < this.highScore.score! && score.phoneNumber != this.highScore.phoneNumber
     })
 
-    const higherScores = top11.filter((score) => {
-      return score.score > this.highScore.score! && score.phoneNumber != this.highScore.phoneNumber
+    // Get list of numbers to ignore (if they have multiple ranks and have a higher one)
+    const ignoreHigherScorePhoneNumbers: {[key:string]: boolean} = {}
+    top11.forEach((score) => {
+      if (score.score > this.highScore.score! && score.phoneNumber != this.highScore.phoneNumber) {
+        ignoreHigherScorePhoneNumbers[score.phoneNumber!] = true
+      }
     })
     
-    const ignoreHigherScorePhoneNumbers = higherScores.map(score => score.phoneNumber)
     const outOfLeaderBoardRank = 11
     const smsRecipients: { [phoneNumber: string]: {phoneNumber: string, fields: RecipientData}} = {}
     
     lowerScores.forEach((score) => {
       if (score.phoneNumber == null || 
           score.phoneNumber in smsRecipients || 
-          ignoreHigherScorePhoneNumbers.includes(score.phoneNumber)) return
+          score.phoneNumber in ignoreHigherScorePhoneNumbers) return
       
       smsRecipients[score.phoneNumber] = {
         phoneNumber: score.phoneNumber,
