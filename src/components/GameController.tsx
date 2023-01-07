@@ -19,7 +19,7 @@ type Scores = {
 
 
 function GameController() {
-  const { gameSession, updateLocalHighScore } = useGameSessionContext()
+  const { gameSession, updateLocalHighScore, updateSessionPhone, updateSessionName } = useGameSessionContext()
   const { canvas } = useCanvasContext()
   const scores = useRef<Scores>()
   const utils = trpc.useContext();
@@ -263,6 +263,15 @@ function GameController() {
 
   function drawScoreForm() {
     $submitScoreForm.current?.children().show()
+    if (gameSession.phoneNumber) {
+      const dashed = addDashes(gameSession.phoneNumber)
+      $phoneInput.current?.val(dashed)
+    }
+
+    if (gameSession.playerName) {
+      $nameInput.current?.val(gameSession.playerName)
+    }
+
     $formCancel.current?.show()
     $formSubmit.current?.show()
     $taunt1.current?.show()
@@ -401,6 +410,8 @@ function GameController() {
         alert(requiredFieldAlerts.join("\n"))
         $formSubmit.current?.one("click", submitHandler)
       } else {
+        updateSessionPhone(phoneNumber)
+        updateSessionName(name)
         submitScore(name, phoneNumber, tauntId)
         showMenu()
       }

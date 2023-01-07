@@ -7,12 +7,16 @@ type GameSession = {
   id: string,
   highScore: number,
   bestGameId: string,
+  phoneNumber: string|null,
+  playerName: string|null
 }
 
 type GameSessionContextType = {
   createSession: () => void,
   gameSession: GameSession,
-  updateLocalHighScore: (highScore: number, gameId: string) => void
+  updateLocalHighScore: (highScore: number, gameId: string) => void,
+  updateSessionPhone: (phoneNumber: string) => void,
+  updateSessionName: (playerName: string) => void,
   setGameSession: (gameSession: GameSession) => void
 }
 
@@ -24,15 +28,22 @@ function useGameSessionContext() {
 
 function GameSessionProvider({children}: {children: React.ReactNode}) {
 
-    const [gameSession, setGameSession] = useState({id: '', highScore: 0, bestGameId: ''})
+    const [gameSession, setGameSession] = useState<GameSession>({id: '', highScore: 0, bestGameId: '', phoneNumber: '', playerName: ''})
     const getSessionQuery = trpc.gameSession.get.useQuery({id: gameSession.id}, {retry: false})
     const createSessionQuery = trpc.gameSession.create.useMutation()
+    const updateSessionQuery = trpc.gameSession.update.useMutation()
     
     useEffect(() => {
         // Get from local or Create GameSession
-        const storedSession = localStorage.getItem(SESSION_KEY) ? JSON.parse(localStorage.getItem(SESSION_KEY) as string) : ''
-        if (storedSession) {
-            setGameSession({id: storedSession.id, highScore: storedSession.highScore, bestGameId: storedSession.bestGameId})
+        const storedSession = getLocalSession()
+        if (Object.keys(storedSession).length > 0) {
+            setGameSession({
+              id: storedSession.id,
+              highScore: storedSession.highScore,
+              bestGameId: storedSession.bestGameId,
+              phoneNumber: storedSession.phoneNumber,
+              playerName: storedSession.playerName
+            })
         } else {
           createSession()
         }
@@ -55,12 +66,18 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
             createSession,
             gameSession,
             updateLocalHighScore,
+            updateSessionPhone,
+            updateSessionName,
             setGameSession: (gameSession: GameSession) => setGameSession(gameSession)
           }}
         >
          {children}
         </GameSessionContext.Provider>
     )
+
+    function getLocalSession() {
+      return localStorage.getItem(SESSION_KEY) ? JSON.parse(localStorage.getItem(SESSION_KEY) as string) : {}
+    }
 
     function verifyLocalSession() {
       // Edge case for invalid local sessions falls back to create new session
@@ -86,8 +103,23 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
     }
 
     function updateLocalHighScore(highScore: number, gameId: string) {
-      const newLocalSession = {...gameSession, highScore: highScore, bestGameId: gameId}
+      const localSession = getLocalSession()
+      const newLocalSession = {...localSession, highScore: highScore, bestGameId: gameId}
       localStorage.setItem(SESSION_KEY, JSON.stringify(newLocalSession))
+    }
+
+    function updateSessionPhone(phoneNumber: string) {
+      const localSession = getLocalSession()
+      const newLocalSession = {...localSession, phoneNumber: phoneNumber}
+      localStorage.setItem(SESSION_KEY, JSON.stringify(newLocalSession))
+      updateSessionQuery.mutate({id: gameSession.id, phoneNumber: phoneNumber})
+    }
+
+    function updateSessionName(playerName: string) {
+      const localSession = getLocalSession()
+      const newLocalSession = {...localSession, playerName: playerName}
+      localStorage.setItem(SESSION_KEY, JSON.stringify(newLocalSession))
+      updateSessionQuery.mutate({id: gameSession.id, playerName: playerName})
     }
 }
 

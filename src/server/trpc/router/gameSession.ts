@@ -5,7 +5,9 @@ import { router, publicProcedure } from "../trpc";
 
 const defaultSessionSelect = Prisma.validator<Prisma.GameSessionSelect>()({
   id: true,
-  highScore: true
+  highScore: true,
+  phoneNumber: true,
+  playerName: true
 });
 
 
@@ -40,6 +42,31 @@ export const gameSessionRouter = router({
       } else {
         return null
       }
+    }),
+  update: publicProcedure
+    .input(z.object({id: z.string(), phoneNumber: z.string().optional(), playerName: z.string().optional()}))
+    .mutation(async ({ctx, input}) => {
+      const id = input.id
+      let data: {[key: string]: string} = {}
+      const phoneNumber = input.phoneNumber
+      const playerName = input.playerName
+      
+      if (playerName) {
+        data.playerName = playerName
+      }
+      if (phoneNumber) {
+        data.phoneNumber = phoneNumber
+      }
+
+      const gameSession = await ctx.prisma.gameSession.update({
+        where: {
+          id: id,
+          
+        },
+        data: data,
+        select: defaultSessionSelect
+      })
+      return gameSession
     }),
   count: publicProcedure
     .input(z.undefined())

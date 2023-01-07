@@ -12,11 +12,13 @@ datasource db {
 }
 
 model GameSession {
-  id        String      @id @default(cuid())
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  games     Game[]      @relation("Games")
-  highScore Int         @default(0)
+  id          String      @id @default(cuid())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  games       Game[]      @relation("Games")
+  highScore   Int         @default(0)
+  phoneNumber String?
+  playerName  String?
 }
 
 model Game {
