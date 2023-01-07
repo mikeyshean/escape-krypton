@@ -47,7 +47,7 @@ export const gameSessionRouter = router({
     .input(z.object({id: z.string(), phoneNumber: z.string().optional(), playerName: z.string().optional()}))
     .mutation(async ({ctx, input}) => {
       const id = input.id
-      let data: {[key: string]: string} = {}
+      const data: {[key: string]: string} = {}
       const phoneNumber = input.phoneNumber
       const playerName = input.playerName
       
