@@ -63,7 +63,7 @@ export default class ScoreService {
     lowerScores.forEach((score) => {
       if (score.phoneNumber == null || 
           score.phoneNumber in smsRecipients || 
-          score.phoneNumber in ignoreHigherScorePhoneNumbers) return
+          ignoreHigherScorePhoneNumbers.includes(score.phoneNumber)) return
       
       smsRecipients[score.phoneNumber] = {
         phoneNumber: score.phoneNumber,
