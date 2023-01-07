@@ -50,14 +50,14 @@ export default class ScoreService {
 
     // Potential SMS recipients
     const lowerScores = top11.filter((score) => {
-      return score.score < this.highScore.score! && score.phoneNumber != this.highScore.phoneNumber
+      return score.score < this.highScore.score! && score.phoneNumber != this.highScore.phoneNumber && score.phoneNumber
     })
 
     // Get list of numbers to ignore (if they have multiple ranks and have a higher one)
     const ignoreHigherScorePhoneNumbers: {[key:string]: boolean} = {}
     top11.forEach((score) => {
-      if (score.score > this.highScore.score! && score.phoneNumber != this.highScore.phoneNumber) {
-        ignoreHigherScorePhoneNumbers[score.phoneNumber!] = true
+      if (score.score > this.highScore.score! && score.phoneNumber != this.highScore.phoneNumber && score.phoneNumber) {
+        ignoreHigherScorePhoneNumbers[score.phoneNumber] = true
       }
     })
     
