@@ -45,8 +45,10 @@ function GameController() {
   let gameEndedAt: number
   
   if (typeof Audio != "undefined") { 
-    themeSong = new Audio("assets/soundfx/superman_theme.mp3") as HTMLAudioElement
+    themeSong = new Audio("assets/soundfx/superman_theme.mp3")
     gameOverAudio = new Audio("assets/soundfx/game_over.mp3")
+    themeSong.volume = .4
+    gameOverAudio.volume = .3
   }
   
   const createGameApi = trpc.game.start.useMutation()
