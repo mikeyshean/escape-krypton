@@ -5,7 +5,6 @@ import { router, publicProcedure } from "../trpc";
 
 const defaultSessionSelect = Prisma.validator<Prisma.GameSessionSelect>()({
   id: true,
-  highScore: true,
   phoneNumber: true,
   playerName: true
 });
@@ -61,7 +60,6 @@ export const gameSessionRouter = router({
       const gameSession = await ctx.prisma.gameSession.update({
         where: {
           id: id,
-          
         },
         data: data,
         select: defaultSessionSelect

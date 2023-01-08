@@ -23,6 +23,11 @@ const defaultGameSelect = Prisma.validator<Prisma.GameSelect>()({
   sessionId: true
 });
 
+const sessionNameSelect = Prisma.validator<Prisma.GameSessionSelect>()({
+  id: true,
+  playerName: true
+});
+
 export const scoreRouter = router({
   top10: publicProcedure
     .input(z.undefined())
@@ -107,7 +112,7 @@ export const scoreRouter = router({
     .input(z.object({
       gameId: z.string(),
       sessionId: z.string(),
-      playerName: z.string(),
+      playerName: z.string().nullable(),
       phoneNumber: z.string().nullable(),
       tauntId: z.string().nullable(),
     }))
@@ -140,12 +145,40 @@ export const scoreRouter = router({
           })
         }
 
+        // Get GameSession for playerName
+        let gameSession = await ctx.prisma.gameSession.findUnique({
+          where: {
+            id: sessionId
+          },
+          select: sessionNameSelect
+        })
+
+        if (!gameSession) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: `GameSession not found`
+          })
+        }
+
+        // Save PlayerName to session if first time submitting
+        if (playerName && !gameSession.playerName) {
+          gameSession = await ctx.prisma.gameSession.update({
+            where: {
+              id: sessionId
+            },
+            data: {
+              playerName: playerName
+            },
+            select: sessionNameSelect
+          })
+        }
+          
         // Save High Score
         const highScore = await ctx.prisma.highScores.create({
           data: {
             score: game.score!,
             phoneNumber: playerPhoneNumber,
-            playerName: playerName,
+            playerName: gameSession?.playerName ?? "???",
             submittedAt: new Date(),
           },
           select: internalScoreSelect

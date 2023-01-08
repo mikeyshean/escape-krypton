@@ -96,7 +96,7 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
 
     async function createSession() {
       const newSession = await createSessionQuery.mutateAsync(true)
-      const gameSession = {...newSession, bestGameId: ''}
+      const gameSession = {...newSession, bestGameId: '', highScore: 0}
       localStorage.setItem(SESSION_KEY, JSON.stringify(gameSession))
       
       setGameSession(gameSession)

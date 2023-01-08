@@ -323,14 +323,11 @@ function GameController() {
   }
 
   function drawNormalScoreForm() {
-    $submitScoreForm.current?.find(".normal-form").show()
+    $submitScoreForm.current?.find(".normal-form").addClass("small-form").show()
 
     if (gameSession.playerName) {
       $nameInput.current?.val(gameSession.playerName)
     }
-
-    $formCancel.current?.addClass("small-form").show()
-    $formSubmit.current?.addClass("small-form").show()
 
     canvas.fillStyle = Constants.GAME_BLUE
     canvas.strokeStyle = Constants.GAME_BLUE
@@ -573,6 +570,7 @@ function GameController() {
     $submitScoreForm.current?.children().hide()
     $formSubmit.current?.off("click").removeClass("small-form")
     $formCancel.current?.off("click").removeClass("small-form")
+    $nameInput.current?.removeClass("small-form")
     $phoneInput.current?.off("keypress")
     $taunt1.current?.removeClass("selected").off("click")
     $taunt2.current?.removeClass("selected").off("click")

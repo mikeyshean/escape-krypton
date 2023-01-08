@@ -189,20 +189,20 @@ input {
 
 /* Normal Score Form */
 
-#score-form  .normal-form.name {
+#score-form  .small-form.name {
   margin-left: 57%;
   margin-top: 7%;
 }
 
-.normal-form.form-cancel, .normal-form.form-submit {
+.small-form.form-cancel, .small-form.form-submit {
   top: 87px;
 }
 
-.normal-form.form-cancel {
+.small-form.form-cancel {
   left: 76%;
 }
 
-.normal-form.form-submit {
+.small-form.form-submit {
   left: 156%;
 }
 

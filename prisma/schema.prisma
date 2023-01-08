@@ -16,7 +16,6 @@ model GameSession {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   games       Game[]      @relation("Games")
-  highScore   Int         @default(0)
   phoneNumber String?
   playerName  String?
 }
@@ -29,6 +28,7 @@ model Game {
   validated Boolean     @default(false)
   session   GameSession @relation("Games", fields: [sessionId], references: [id])
   sessionId String
+  highScore HighScores?
 }
 
 model HighScores {
@@ -37,6 +37,8 @@ model HighScores {
   playerName    String   
   phoneNumber   String?   
   submittedAt   DateTime   
+  game          Game?       @relation(fields: [gameId], references: [id])
+  gameId        String?     @unique
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt 
 
