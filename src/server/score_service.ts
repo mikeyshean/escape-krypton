@@ -8,7 +8,6 @@ import { sendSMS } from '../server/twilio/sendSMS'
 type RecipientData = {
   taunt: string
   playerName: string
-  newRank: string
   newHighScore: number
   beatenScore: number
   beatenPlayer: string
@@ -16,20 +15,6 @@ type RecipientData = {
 }
 
 const NEW_LEADER_MESSAGE_ID = 1
-const DOWN_RANKED_MESSAGE_ID = 2
-const KNOCKED_OUT_MESSAGE_ID = 3
-const ORDINAL_SUFFIX:{[key:number]: string} = {
-  1: "st",
-  2: "nd",
-  3: "rd",
-  4: "th",
-  5: "th",
-  6: "th",
-  7: "th",
-  8: "th",
-  9: "th",
-  10: "th"
-}
 
 export default class ScoreService {
   private highScore
@@ -45,49 +30,38 @@ export default class ScoreService {
   async sendSmsNotifications(tauntId: string|null) {
     if (this.highScore.score == null) return
   
-    const top11 = await this.getTop11Scorers()
-    const taunt = await this.getTaunt(tauntId)
-
-    // Potential SMS recipients
-    const lowerScores = top11.filter((score) => {
-      return score.score < this.highScore.score! && score.phoneNumber != this.highScore.phoneNumber && score.phoneNumber
-    })
-
-    // Get list of numbers to ignore (if they have multiple ranks and have a higher one)
-    const ignoreHigherScorePhoneNumbers: {[key:string]: boolean} = {}
-    top11.forEach((score) => {
-      if (score.score > this.highScore.score! && score.phoneNumber != this.highScore.phoneNumber && score.phoneNumber) {
-        ignoreHigherScorePhoneNumbers[score.phoneNumber] = true
-      }
-    })
+    const top10 = await this.getTop10WithPhoneNumbers()
     
-    const outOfLeaderBoardRank = 11
+    // Potential SMS recipients
+    const lowerScores = top10.filter((score) => {
+      return (score.rank == 2 &&
+        score.phoneNumber &&
+        score.score < this.highScore.score! && 
+        score.phoneNumber != this.highScore.phoneNumber
+        )
+      })
+
+    // No previous #1 spots we can notify
+    if (lowerScores.length == 0) {
+      return
+    }
+    
+    const taunt = await this.getTaunt(tauntId)
     const smsRecipients: { [phoneNumber: string]: {phoneNumber: string, fields: RecipientData}} = {}
     
     lowerScores.forEach((score) => {
-      if (score.phoneNumber == null || 
-          score.phoneNumber in smsRecipients || 
-          score.phoneNumber in ignoreHigherScorePhoneNumbers) return
+      if (score.phoneNumber == null || score.phoneNumber in smsRecipients) return
       
       smsRecipients[score.phoneNumber] = {
         phoneNumber: score.phoneNumber,
         fields: {
           taunt: taunt?.text || "",
           playerName: this.highScore.playerName,
-          newRank: `${score.rank}${ORDINAL_SUFFIX[score.rank]}`,
           newHighScore: this.highScore.score,
           beatenScore: score.score,
           beatenPlayer: score.playerName,
-          messageId: 0
+          messageId: NEW_LEADER_MESSAGE_ID
         }
-      }
-
-      if (score.rank == 2) {
-        smsRecipients[score.phoneNumber]!.fields!['messageId'] = NEW_LEADER_MESSAGE_ID
-      } else if (score.rank == outOfLeaderBoardRank) {
-        smsRecipients[score.phoneNumber]!.fields!['messageId'] = KNOCKED_OUT_MESSAGE_ID
-      } else {
-        smsRecipients[score.phoneNumber]!.fields!['messageId'] = DOWN_RANKED_MESSAGE_ID
       }
     })
 
@@ -113,7 +87,6 @@ export default class ScoreService {
 
       const messageId = fieldsObject['messageId']
       const playerName = fieldsObject['playerName']
-      const newRank = fieldsObject['newRank']
       const newHighScore = fieldsObject['newHighScore']
       const beatenScore = fieldsObject['beatenScore']
       const beatenPlayer = fieldsObject['beatenPlayer']
@@ -121,16 +94,8 @@ export default class ScoreService {
       const tauntMsg = taunt ? `${playerName} says, ${taunt}` : ''
       let message = ''
       
-      switch (messageId) {
-        case DOWN_RANKED_MESSAGE_ID:
-          message = `🪐Krypton Alert🪐\nHey, ${beatenPlayer}! ${playerName} just made it onto the leaderboard and knocked you down to ${newRank} place! ${tauntMsg}`
-          break
-        case NEW_LEADER_MESSAGE_ID:
+      if (messageId == NEW_LEADER_MESSAGE_ID) {
           message = `🪐Krypton Alert🪐\nHey, ${beatenPlayer}! Your TOP Score of ${beatenScore}, was just beaten by ${playerName} who scored ${newHighScore}! ${tauntMsg}`
-          break
-        case KNOCKED_OUT_MESSAGE_ID:
-          message = `🪐Krypton Alert🪐\nHey, ${beatenPlayer}! ${playerName} just knocked you off the leaderboard with a score of ${newHighScore}! ${tauntMsg}`
-          break
       }
 
       if (message && sms.phoneNumber) {
@@ -163,11 +128,11 @@ export default class ScoreService {
     return await smsCaller.update({id: id, dateFailed: dateFailed})
   }
 
-  async getTop11Scorers() {
+  async getTop10WithPhoneNumbers() {
     const ctx = await createContextInner({})
     const scoreCaller = this.scoreRouter.createCaller(ctx)
 
-    return await scoreCaller.top11()
+    return await scoreCaller.top10WithPhoneNumbers()
   }
 
   async getTaunt(id: string|null) {

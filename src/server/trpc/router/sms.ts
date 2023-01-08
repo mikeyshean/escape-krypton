@@ -29,7 +29,6 @@ export const smsRouter = router({
       fields: z.object({
         taunt: z.string(),
         playerName: z.string(),
-        newRank: z.string(),
         newHighScore: z.number(),
         beatenScore: z.number(),
         beatenPlayer: z.string(),

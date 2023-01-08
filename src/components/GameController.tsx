@@ -259,6 +259,9 @@ function GameController() {
   function showSubmitScoreForm() {
     if (isNewTopScore()) {
       drawNewLeaderScoreForm()
+    } else if (gameSession.playerName) {
+      submitScore()
+      showMenu()
     } else {
       drawNormalScoreForm()
     }
@@ -500,21 +503,19 @@ function GameController() {
     return validGame 
   }
 
-  function submitScore(name: string|null, phoneNumber: string|null = null, tauntId: string|null = null) {
-    if (name) {
-      submitScoreApi.mutate({
-        sessionId: gameSession.id,
-        playerName: name,
-        gameId: bestGameId,
-        tauntId: tauntId,
-        phoneNumber: phoneNumber
-      }, {
-        onSuccess: () => {
-          utils.score.top10.invalidate()
-          resetHighScore()
-        }
-      })
-    }
+  function submitScore(name: string|null = null, phoneNumber: string|null = null, tauntId: string|null = null) {
+    submitScoreApi.mutate({
+      sessionId: gameSession.id,
+      playerName: name,
+      gameId: bestGameId,
+      tauntId: tauntId,
+      phoneNumber: phoneNumber
+    }, {
+      onSuccess: () => {
+        utils.score.top10.invalidate()
+        resetHighScore()
+      }
+    })
   }
   
   /******//******//******//******//******//******//******//******//******//*

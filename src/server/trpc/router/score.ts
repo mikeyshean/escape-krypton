@@ -69,20 +69,20 @@ export const scoreRouter = router({
     }),
 
   //  For internal SMS delivery use
-  top11: publicProcedure
+  top10WithPhoneNumbers: publicProcedure
     .input(z.undefined())
     .query(async ({ ctx }) => {
       
       // Get top 11 distinct scores
-      const top11scores = await ctx.prisma.highScores.findMany({
+      const top10scores = await ctx.prisma.highScores.findMany({
         select: internalScoreSelect,
         orderBy: {score: 'desc'},
-        take: 11,
+        take: 10,
         distinct: ['score']
       })
-      const topScores = top11scores.flatMap((obj) => obj.score)
+      const topScores = top10scores.flatMap((obj) => obj.score)
       
-      // Get all highscores in the top 11 values with phoneNumbers
+      // Get all highscores in the top 10 values with phoneNumbers
       const scores = await ctx.prisma.highScores.findMany({
         select: internalScoreSelect,
         where: {
@@ -97,7 +97,7 @@ export const scoreRouter = router({
       })
       let current = scores[0]?.score as number
       let rank = 1
-      const rankedScores = scores.map((score) => {
+      const rankedScoresWithPhoneNumbers = scores.map((score) => {
         if (current != score.score) {
           current = score.score
           rank += 1
@@ -105,7 +105,7 @@ export const scoreRouter = router({
         return { ...score, rank: rank}
       })
 
-      return rankedScores
+      return rankedScoresWithPhoneNumbers
     }),
 
   submit: publicProcedure
@@ -179,7 +179,8 @@ export const scoreRouter = router({
             score: game.score!,
             phoneNumber: playerPhoneNumber,
             playerName: gameSession?.playerName ?? "???",
-            submittedAt: new Date(),
+            gameId: game.id,
+            submittedAt: new Date()
           },
           select: internalScoreSelect
         })

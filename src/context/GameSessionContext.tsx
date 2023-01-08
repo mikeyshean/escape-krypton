@@ -29,7 +29,12 @@ function useGameSessionContext() {
 function GameSessionProvider({children}: {children: React.ReactNode}) {
 
     const [gameSession, setGameSession] = useState<GameSession>({id: '', highScore: 0, bestGameId: '', phoneNumber: '', playerName: ''})
-    const getSessionQuery = trpc.gameSession.get.useQuery({id: gameSession.id}, {retry: false})
+    const getSessionQuery = trpc.gameSession.get.useQuery({id: gameSession.id}, {
+      retry: false,
+      onSuccess: (data) => {
+        updateLocalSession(data)
+      }
+    })
     const createSessionQuery = trpc.gameSession.create.useMutation()
     const updateSessionQuery = trpc.gameSession.update.useMutation()
     
@@ -37,17 +42,19 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
         // Get from local or Create GameSession
         const storedSession = getLocalSession()
         if (Object.keys(storedSession).length > 0) {
-            setGameSession({
-              id: storedSession.id,
-              highScore: storedSession.highScore,
-              bestGameId: storedSession.bestGameId,
-              phoneNumber: storedSession.phoneNumber,
-              playerName: storedSession.playerName
-            })
+          setGameSession({
+            id: storedSession.id,
+            highScore: storedSession.highScore,
+            bestGameId: storedSession.bestGameId,
+            phoneNumber: storedSession.phoneNumber,
+            playerName: storedSession.playerName
+          })
         } else {
           createSession()
         }
     }, [])
+
+    getSessionQuery
 
     // Validate local session on backend
     verifyLocalSession()
@@ -120,6 +127,16 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
       const newLocalSession = {...localSession, playerName: playerName}
       localStorage.setItem(SESSION_KEY, JSON.stringify(newLocalSession))
       updateSessionQuery.mutate({id: gameSession.id, playerName: playerName})
+    }
+
+    function updateLocalSession(gameSession: {
+      id: string;
+      phoneNumber: string | null;
+      playerName: string | null;
+    } | null) {
+      const localSession = getLocalSession()
+      const newLocalSession = {...localSession, playerName: gameSession?.playerName, phoneNumber: gameSession?.phoneNumber}
+      localStorage.setItem(SESSION_KEY, JSON.stringify(newLocalSession))
     }
 }
 
