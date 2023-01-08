@@ -53,7 +53,7 @@ const Home: NextPage = () => {
           <span className="restart">Restart</span>
           <span className="submit">Submit<br/> Best</span>
           <form id="score-form">
-            <input className="name no-outline normal-form" type="text" />
+            <input className="name no-outline normal-form" maxLength={10} type="text" />
             <div className="tooltip tooltip-phone">
               <span className="question-icon">?</span>
               <span className="tooltiptext">

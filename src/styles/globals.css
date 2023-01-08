@@ -51,7 +51,7 @@ body, .window-container {
   text-align: center;
   background: url("../../public/assets/bg.jpg") no-repeat fixed; 
   background-size: cover;
-  background-color: #1A1D34;
+  background-color: black;
 }
 
 ul {
@@ -121,8 +121,6 @@ input {
   top: 65%;
 }
 
-
-
 /* Form Button Text */
 .form-submit, .form-cancel, .taunt {
   position: absolute;
@@ -138,10 +136,76 @@ input {
   color: white;
 }
 
-
 .form-cancel {
   left: 70%;
 }
+
+/* Taunts */
+
+.taunt {
+  color: #B42420;
+  top: 58px;
+}
+
+.taunt.selected {
+  color: #fff;
+}
+
+.taunt-1 {
+  left: 50%;
+}
+
+.taunt-2 {
+  left: 116%;
+}
+
+.taunt-3 {
+  left: 182%;
+}
+
+#score-form {
+  position: absolute;
+  z-index: 1;
+  top: 46%;
+  left: 25%;
+}
+
+#score-form input {
+  display: block;
+  height: 28px;
+  margin-top: -19.5%;
+  width: 87%;
+}
+
+#score-form .name {
+  margin-left: 21%;
+}
+
+#score-form .phone {
+  margin-left: 125%;
+  margin-top: -15%;
+} 
+
+
+/* Normal Score Form */
+
+#score-form  .normal-form.name {
+  margin-left: 57%;
+  margin-top: 7%;
+}
+
+.normal-form.form-cancel, .normal-form.form-submit {
+  top: 87px;
+}
+
+.normal-form.form-cancel {
+  left: 76%;
+}
+
+.normal-form.form-submit {
+  left: 156%;
+}
+
 
 /* Tool tip */
 
@@ -197,53 +261,6 @@ input {
   color:  rgb(240, 240, 240);;
   background: rgb(98, 98, 98);
 }
-
-
-/* Taunts */
-
-.taunt {
-  color: #B42420;
-  top: 58px;
-}
-
-.taunt.selected {
-  color: #fff;
-}
-
-.taunt-1 {
-  left: 50%;
-}
-
-.taunt-2 {
-  left: 116%;
-}
-
-.taunt-3 {
-  left: 182%;
-}
-
-#score-form {
-  position: absolute;
-  z-index: 1;
-  top: 46%;
-  left: 25%;
-}
-
-#score-form input {
-  display: block;
-  height: 28px;
-  margin-top: -19.5%;
-  width: 87%;
-}
-
-#score-form .name {
-  margin-left: 21%;
-}
-
-#score-form .phone {
-  margin-left: 125%;
-  margin-top: -15%;
-} 
 
 
 /* Leaderboard */

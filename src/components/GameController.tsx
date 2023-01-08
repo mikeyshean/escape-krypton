@@ -257,11 +257,21 @@ function GameController() {
 
 
   function showSubmitScoreForm() {
-    drawScoreForm()
+    if (isNewTopScore()) {
+      drawNewLeaderScoreForm()
+    } else {
+      drawNormalScoreForm()
+    }
     attachFormEventHandlers()
   }
 
-  function drawScoreForm() {
+  function isNewTopScore(): boolean {
+    return scores.current?.some((score) => {
+      return score.rank == 1 && score.score < highScore
+    }) || scores.current?.length == 0
+  }
+
+  function drawNewLeaderScoreForm() {
     $submitScoreForm.current?.children().show()
     if (gameSession.phoneNumber) {
       const dashed = addDashes(gameSession.phoneNumber)
@@ -310,6 +320,39 @@ function GameController() {
     drawTauntBox(1)
     drawTauntBox(2)
     drawTauntBox(3)
+  }
+
+  function drawNormalScoreForm() {
+    $submitScoreForm.current?.find(".normal-form").show()
+
+    if (gameSession.playerName) {
+      $nameInput.current?.val(gameSession.playerName)
+    }
+
+    $formCancel.current?.addClass("small-form").show()
+    $formSubmit.current?.addClass("small-form").show()
+
+    canvas.fillStyle = Constants.GAME_BLUE
+    canvas.strokeStyle = Constants.GAME_BLUE
+    canvas.lineJoin = "round"
+    canvas.lineWidth = 10
+
+    // outer box
+    roundRect(250, 100, 300, 200, 10)
+
+    canvas.fillStyle = Constants.GAME_RED
+    canvas.strokeStyle = Constants.GAME_RED
+
+    // cancel/submit button
+    roundRect(410, 245, 120, 45, 10)
+    roundRect(270, 245, 120, 45, 10)
+
+    canvas.fillStyle = Constants.GAME_WHITE
+    canvas.font = "14px 'Press Start 2P'"
+
+    // Name Input
+    canvas.fillText("Enter your name:", 290, 150)
+    roundRect(285, 165, 230, 35, 10)
   }
   
   const attachFormEventHandlers = () => {
@@ -400,13 +443,6 @@ function GameController() {
       if (!name) {
        requiredFieldAlerts.push("* Name is required")
       }
-      // Switching to optional fields
-      // if (phoneNumber.length != 10) {
-      //  requiredFieldAlerts.push("* Phone number is required")
-      // }
-      // if (!tauntId) {
-      //  requiredFieldAlerts.push("* Come on, taunting is fun! Pick one!")
-      // }
       if (requiredFieldAlerts.length > 0) {
         alert(requiredFieldAlerts.join("\n"))
         $formSubmit.current?.one("click", submitHandler)
@@ -535,14 +571,12 @@ function GameController() {
     
     // Leader Form
     $submitScoreForm.current?.children().hide()
-    $formSubmit.current?.hide()
-    $formCancel.current?.hide()
-    $formSubmit.current?.off("click")
-    $formCancel.current?.off("click")
+    $formSubmit.current?.off("click").removeClass("small-form")
+    $formCancel.current?.off("click").removeClass("small-form")
     $phoneInput.current?.off("keypress")
-    $taunt1.current?.hide().removeClass("selected").off("click")
-    $taunt2.current?.hide().removeClass("selected").off("click")
-    $taunt3.current?.hide().removeClass("selected").off("click")
+    $taunt1.current?.removeClass("selected").off("click")
+    $taunt2.current?.removeClass("selected").off("click")
+    $taunt3.current?.removeClass("selected").off("click")
   }
 
   function bindKeys(intervalId: NodeJS.Timer|undefined, withClick = true) {
