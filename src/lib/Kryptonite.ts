@@ -1,4 +1,5 @@
 import { Constants } from '../constants'
+import GameObject from './GameObject'
 
 // All these constants are not necessary anymore, but I distinctly remember how helpful they were during development to 
 // quickly test different settings until I got the gameplay to feel just right.
@@ -13,7 +14,14 @@ const KRYPTONITE_WIDTH = 40
 const COLLISION_PADDING = 3 
 const PADDED_KRYPTONITE_WIDTH = KRYPTONITE_WIDTH + COLLISION_PADDING
 
-class Kryptonite {
+class Kryptonite implements GameObject {
+  /*
+    This class is a bit unusual in that each instance is responsible for TWO kryptonite, the top and bottom one.
+    Because the top and bottom kryptonite share their X coord as it moves across the screen and they share 
+    a relationship in reference to the position of the GAP created between them, it helps to keep their properties
+    and functionality together.
+  */
+
   topKryptoniteHeight = Math.random() * MAX_HEIGHT + MIN_HEIGHT
   bottomKryptoniteHeight: number
   xBottomPosition: number
