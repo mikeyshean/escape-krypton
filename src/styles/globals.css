@@ -51,7 +51,7 @@ body, .window-container {
   text-align: center;
   background: url("../../public/assets/bg.jpg") no-repeat fixed; 
   background-size: cover;
-  background-color: #1A1D34;
+  background-color: black;
 }
 
 ul {
@@ -121,8 +121,6 @@ input {
   top: 65%;
 }
 
-
-
 /* Form Button Text */
 .form-submit, .form-cancel, .taunt {
   position: absolute;
@@ -138,66 +136,9 @@ input {
   color: white;
 }
 
-
 .form-cancel {
   left: 70%;
 }
-
-/* Tool tip */
-
-.tooltip {
-  position: absolute;
-  display: inline-block;
-  border-bottom: 1px dotted black;
-}
-
-.tooltip.tooltip-phone {
-  top: -71px;
-  left: 197%;
-}
-
-.tooltip.tooltip-taunt {
-  top: 19px;
-  left: 118%;
-}
-
-.tooltip .tooltiptext {
-  visibility: hidden;
-  color: rgb(240, 240, 240);
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 0;
-  width: 450px;
-  bottom: 100%;
-  left: 50%;
-  margin-left: -180px; /* Use half of the width (120/2 = 60), to center the tooltip */
-
-  /* Position the tooltip */
-  position: absolute;
-  z-index: 1;
-}
-
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-  border: 5px;
-  border-style: solid;
-  background-color: #cb5b57;
-  color: black;
-  border-color: rgb(11, 10, 10);
-  font-size: 10px;
-}
-
-.question-icon {
-  position: absolute;
-  width: 25px;
-  height: 25px;
-  border-color:  rgb(240, 240, 240);;
-  border-radius: 20%;
-  border-width: 2px;
-  color:  rgb(240, 240, 240);;
-  background: rgb(98, 98, 98);
-}
-
 
 /* Taunts */
 
@@ -244,6 +185,82 @@ input {
   margin-left: 125%;
   margin-top: -15%;
 } 
+
+
+/* Normal Score Form */
+
+#score-form  .normal-form.name {
+  margin-left: 57%;
+  margin-top: 7%;
+}
+
+.normal-form.form-cancel, .normal-form.form-submit {
+  top: 87px;
+}
+
+.normal-form.form-cancel {
+  left: 76%;
+}
+
+.normal-form.form-submit {
+  left: 156%;
+}
+
+
+/* Tool tip */
+
+.tooltip {
+  position: absolute;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip.tooltip-phone {
+  top: -71px;
+  left: 197%;
+}
+
+.tooltip.tooltip-taunt {
+  top: 19px;
+  left: 118%;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  color: rgb(240, 240, 240);
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  width: 400px;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -180px; /* Use half of the width (120/2 = 60), to center the tooltip */
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  border: 5px;
+  border-style: solid;
+  background-color: #cb5b57;
+  color: black;
+  border-color: rgb(11, 10, 10);
+  font-size: 10px;
+}
+
+.question-icon {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  border-color:  rgb(240, 240, 240);;
+  border-radius: 20%;
+  border-width: 2px;
+  color:  rgb(240, 240, 240);;
+  background: rgb(98, 98, 98);
+}
 
 
 /* Leaderboard */

@@ -53,13 +53,11 @@ const Home: NextPage = () => {
           <span className="restart">Restart</span>
           <span className="submit">Submit<br/> Best</span>
           <form id="score-form">
-            <input className="name no-outline" type="text" />
+            <input className="name no-outline normal-form" maxLength={10} type="text" />
             <div className="tooltip tooltip-phone">
               <span className="question-icon">?</span>
               <span className="tooltiptext">
-                <p>- Get notified if anyone passes your rank</p>
-                <p>- If you have multiple positions on the board, you&apos;ll only be notified for your highest score</p>
-                <p>(Optional)</p>
+                Get notified if anyone knocks you out <br/> of the #1 spot (Optional)
               </span>
             </div>
             <input 
@@ -70,7 +68,7 @@ const Home: NextPage = () => {
             />
             <div className="tooltip tooltip-taunt">
               <span className="question-icon">?</span>
-              <span className="tooltiptext">Send a message to everyone you pass on the leaderboard</span>
+              <span className="tooltiptext">Send a message to the previous top ranked player</span>
             </div>
             {
               taunts.current?.map((taunt, idx) => {
@@ -80,8 +78,8 @@ const Home: NextPage = () => {
                 )
               })
             }
-            <span className="form-cancel">Cancel</span>
-            <span className="form-submit">Submit</span>
+            <span className="form-cancel normal-form">Cancel</span>
+            <span className="form-submit normal-form">Submit</span>
           </form>
         </div>
         <div className="counter-container">
