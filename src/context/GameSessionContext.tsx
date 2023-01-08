@@ -54,8 +54,6 @@ function GameSessionProvider({children}: {children: React.ReactNode}) {
         }
     }, [])
 
-    getSessionQuery
-
     // Validate local session on backend
     verifyLocalSession()
 
