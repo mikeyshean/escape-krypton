@@ -47,8 +47,8 @@ function GameController() {
   if (typeof Audio != "undefined") { 
     themeSong = new Audio("assets/soundfx/superman_theme.mp3")
     gameOverAudio = new Audio("assets/soundfx/game_over.mp3")
-    themeSong.volume = .4
-    gameOverAudio.volume = .3
+    themeSong.volume = .09
+    gameOverAudio.volume = .055
   }
   
   const createGameApi = trpc.game.start.useMutation()
