@@ -25,6 +25,7 @@ class Superman {
   constructor(ctx: CanvasRenderingContext2D) {
     this.image.src = 'assets/images/chubby-superman.png'
     this.flySound.src = 'assets/soundfx/fly.m4a'
+    this.flySound.volume = .08
     this.ctx = ctx
     this.gravity = Constants.GAME_GRAVITY
   }
