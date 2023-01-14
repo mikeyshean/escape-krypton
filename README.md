@@ -1,51 +1,24 @@
-# Escape from Krypton
+<p align="center">
+  <a href="https://nextjs.org">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="./public/assets/images/chubby-superman-solo.png">
+      <img src="./public/assets/images/chubby-superman.png" height="128">
+    </picture>
+    <h1 align="center">Escape Krypton</h1>
+  </a>
+</p>
 
+Escape Krypton is a Superman themed browser game based on the ever 
+addicting *Flappy Bird*.  This is the 2022 remake of one of my capstone 
+projects that I presented for Demo Day while attending the App Academy 
+Web Development Boot Camp in 2015. It was originally written in Javascript and utilized HTML5 / Canvas. [Original Repo](http://github.com/mikeyshean/krypton)
 
+## New for 2022
 
-*Escape from Krypton* is a Superman themed browser game based on the ever addicting *Flappy Bird*.  It was originally written in Javascript and utilized HTML5 / Canvas. The original project can be found here: [Link](http://github.com/mikeyshean/krypton)
+- Migrated codebase to TypeScript as a Next.js project using the t3 stack
+- tRPC/Prisma backend to manage game sessions and leadboard rankings
+- Twilio based SMS to be notified if you lose the #1 rank (just for fun)
+- Ability to send one of a few pre-select messages to the person you knocked out of first place (more fun)
+- Background sprites for that flying through space ambience
 
-[Live][kryptonite]
-[kryptonite]: http://mikeyshean.com/kryptonite
-
-## To-do
-
-- [ ] Instructions on Splash Page
-- [ ] Scrolling floor/background
-- [ ] Leaderboard
-- [ ] Laser Vision Powerups!
-
-
-## How to Play
-- Press space, up, or use mouse-clicks to fly
-- Avoid Kryptonite
-- That's it!
-
-## Features
-- Utilizes duck typing for Kryptonite/Superman objects to dry up code
-- Three customized collision detection methods
-- Kryptonite drawn with Photoshop CC
-- *Util* class created to abstract out repetitive code
-
-
-## Collision Detection
-
-In order to detect when Superman collides with a Kryptonite crystal I've
-defined a "hit box" boundary around each that will be used to calculate 
-when a collision occurs.  For this game we need three types of collision detection detailed below:
-
-
-#### `sideCollision()`:
-Here we detect when the right vertical edge of Superman's triangular "hit box" collides with the left edge of the Kryptonite.
-
-![sideCollision](./public/assets/docs/side_collision.png)
-
-#### `gapCollision()`:
-
-Here we detect when the top point or bottom edge of Superman collides with the top/bottom edges of the Kryptonite within the gap.
-
-![gapCollision](./public/assets/docs/gap_collision.png)
-
-#### `trigCollision()`:
-Finally, we detect when the rear hypotenuse edge of Superman's hit box collides with the bottom edge of the top Kryptonite.
-
-![trigCollision](./public/assets/docs/trig_collision.png)
+Read more details of the development process and general updates on my [blog](https://mikeyshean.com/blog)
