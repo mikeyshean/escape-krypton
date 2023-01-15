@@ -1,8 +1,8 @@
 <p align="center">
-  <a href="https://nextjs.org">
+  <a href="https://escapekrypton.com">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="./public/assets/images/chubby-superman-solo.png">
-      <img src="./public/assets/images/chubby-superman.png" height="128">
+      <img src="./public/assets/images/chubby-superman-solo.png" height="128">
     </picture>
     <h1 align="center">Escape Krypton</h1>
   </a>
