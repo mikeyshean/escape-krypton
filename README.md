@@ -21,4 +21,4 @@ Web Development Boot Camp in 2015. It was originally written in Javascript and u
 - Ability to send one of a few pre-select messages to the person you knocked out of first place (more fun)
 - Background sprites for that flying through space ambience
 
-Read more details of the development process and general updates on my [blog](https://mikeyshean.com/blog)
+Read more details of the development process and general updates on my [blog](https://www.mikeyshean.com/blog/02_escape_from_krypton)
