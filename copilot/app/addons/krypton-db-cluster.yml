@@ -59,61 +59,61 @@ Resources:
       VpcId:
         Fn::ImportValue:
           !Sub '${App}-${Env}-VpcId'
-  # kryptondbclusterAuroraSecret:
-  #   Metadata:
-  #     'aws:copilot:description': 'A Secrets Manager secret to store your DB credentials'
-  #   Type: AWS::SecretsManager::Secret
-  #   Properties:
-  #     Description: !Sub Aurora main user secret for ${AWS::StackName}
-  #     GenerateSecretString:
-  #       SecretStringTemplate: '{"username": "postgres"}'
-  #       GenerateStringKey: "password"
-  #       ExcludePunctuation: true
-  #       IncludeSpace: false
-  #       PasswordLength: 16
-  # kryptondbclusterDBClusterParameterGroup:
-  #   Metadata:
-  #     'aws:copilot:description': 'A DB parameter group for engine configuration values'
-  #   Type: 'AWS::RDS::DBClusterParameterGroup'
-  #   Properties:
-  #     Description: !Ref 'AWS::StackName'
-  #     Family: 'aurora-postgresql14'
-  #     Parameters:
-  #       client_encoding: 'UTF8'
-  # kryptondbclusterDBCluster:
-  #   Metadata:
-  #     'aws:copilot:description': 'The kryptondbcluster Aurora Serverless v2 database cluster'
-  #   Type: 'AWS::RDS::DBCluster'
-  #   Properties:
-  #     MasterUsername:
-  #       !Join [ "",  [ '{{resolve:secretsmanager:', !Ref kryptondbclusterAuroraSecret, ":SecretString:username}}" ]]
-  #     MasterUserPassword:
-  #       !Join [ "",  [ '{{resolve:secretsmanager:', !Ref kryptondbclusterAuroraSecret, ":SecretString:password}}" ]]
-  #     DatabaseName: !Ref kryptondbclusterDBName
-  #     Engine: 'aurora-postgresql'
-  #     EngineVersion: '14.4'
-  #     DBClusterParameterGroupName: !Ref kryptondbclusterDBClusterParameterGroup
-  #     DBSubnetGroupName: !Ref kryptondbclusterDBSubnetGroup
-  #     Port: 5432
-  #     VpcSecurityGroupIds:
-  #       - !Ref kryptondbclusterDBClusterSecurityGroup
-  #     ServerlessV2ScalingConfiguration:
-  #       # Replace "All" below with "!Ref Env" to set different autoscaling limits per environment.
-  #       MinCapacity: !FindInMap [kryptondbclusterEnvScalingConfigurationMap, All, DBMinCapacity]
-  #       MaxCapacity: !FindInMap [kryptondbclusterEnvScalingConfigurationMap, All, DBMaxCapacity]
-  # kryptondbclusterDBWriterInstance:
-  #   Metadata:
-  #     'aws:copilot:description': 'The kryptondbcluster Aurora Serverless v2 writer instance'
-  #   Type: 'AWS::RDS::DBInstance'
-  #   Properties:
-  #     DBClusterIdentifier: !Ref kryptondbclusterDBCluster
-  #     DBInstanceClass: db.serverless
-  #     Engine: 'aurora-postgresql'
-  #     PromotionTier: 1
-  #     AvailabilityZone: !Select
-  #       - 0
-  #       - !GetAZs
-  #         Ref: AWS::Region
+  kryptondbclusterAuroraSecret:
+    Metadata:
+      'aws:copilot:description': 'A Secrets Manager secret to store your DB credentials'
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub Aurora main user secret for ${AWS::StackName}
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "postgres"}'
+        GenerateStringKey: "password"
+        ExcludePunctuation: true
+        IncludeSpace: false
+        PasswordLength: 16
+  kryptondbclusterDBClusterParameterGroup:
+    Metadata:
+      'aws:copilot:description': 'A DB parameter group for engine configuration values'
+    Type: 'AWS::RDS::DBClusterParameterGroup'
+    Properties:
+      Description: !Ref 'AWS::StackName'
+      Family: 'aurora-postgresql14'
+      Parameters:
+        client_encoding: 'UTF8'
+  kryptondbclusterDBCluster:
+    Metadata:
+      'aws:copilot:description': 'The kryptondbcluster Aurora Serverless v2 database cluster'
+    Type: 'AWS::RDS::DBCluster'
+    Properties:
+      MasterUsername:
+        !Join [ "",  [ '{{resolve:secretsmanager:', !Ref kryptondbclusterAuroraSecret, ":SecretString:username}}" ]]
+      MasterUserPassword:
+        !Join [ "",  [ '{{resolve:secretsmanager:', !Ref kryptondbclusterAuroraSecret, ":SecretString:password}}" ]]
+      DatabaseName: !Ref kryptondbclusterDBName
+      Engine: 'aurora-postgresql'
+      EngineVersion: '14.4'
+      DBClusterParameterGroupName: !Ref kryptondbclusterDBClusterParameterGroup
+      DBSubnetGroupName: !Ref kryptondbclusterDBSubnetGroup
+      Port: 5432
+      VpcSecurityGroupIds:
+        - !Ref kryptondbclusterDBClusterSecurityGroup
+      ServerlessV2ScalingConfiguration:
+        # Replace "All" below with "!Ref Env" to set different autoscaling limits per environment.
+        MinCapacity: !FindInMap [kryptondbclusterEnvScalingConfigurationMap, All, DBMinCapacity]
+        MaxCapacity: !FindInMap [kryptondbclusterEnvScalingConfigurationMap, All, DBMaxCapacity]
+  kryptondbclusterDBWriterInstance:
+    Metadata:
+      'aws:copilot:description': 'The kryptondbcluster Aurora Serverless v2 writer instance'
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      DBClusterIdentifier: !Ref kryptondbclusterDBCluster
+      DBInstanceClass: db.serverless
+      Engine: 'aurora-postgresql'
+      PromotionTier: 1
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs
+          Ref: AWS::Region
 
   kryptondbclusterSecretAuroraClusterAttachment:
     Type: AWS::SecretsManager::SecretTargetAttachment
